@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev'
       - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
