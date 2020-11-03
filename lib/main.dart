@@ -57,25 +57,25 @@ class _HomePageState extends State<HomePage> {
               alignment: Alignment.topCenter,
               child: Padding(
                   padding: EdgeInsets.all(30),
-                  child: Image.asset('images/Trello_logo.png',
+                  child: Image.network('images/Trello_logo.png',
                       width: 200, height: 40)),
             ),
 
             Align(
               alignment: Alignment.bottomLeft,
-              child: Image.asset('images/left_photo_background.jpg',
+              child: Image.network('images/left_photo_background.jpg',
                   width: 375, height: 375),
             ),
 
             Align(
               alignment: Alignment.bottomRight,
-              child: Image.asset('images/right_photo_background.jpg',
+              child: Image.network('images/right_photo_background.jpg',
                   width: 375, height: 275),
             ),
             Align(
               alignment: Alignment.bottomCenter,
               child:
-                  Image.asset('images/atlassian.png', width: 150, height: 100),
+                  Image.network('images/atlassian.png', width: 150, height: 100),
             ),
             Align(
               alignment: Alignment.center,
