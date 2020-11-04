@@ -52,21 +52,11 @@ class _HomePageState extends State<HomePage> {
                 )
               ],
             ),
-
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                  padding: EdgeInsets.all(30),
-                  child: Image.network('assets/images/Trello_logo.png',
-                      width: 200, height: 40)),
-            ),
-
             Align(
               alignment: Alignment.bottomLeft,
               child: Image.network('assets/images/left_photo_background.jpg',
                   width: 375, height: 375),
             ),
-
             Align(
               alignment: Alignment.bottomRight,
               child: Image.network('assets/images/right_photo_background.jpg',
@@ -74,32 +64,39 @@ class _HomePageState extends State<HomePage> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child:
-                  Image.network('assets/images/atlassian.png', width: 150, height: 100),
+              child: Image.network('assets/images/atlassian_logo.png',
+                  width: 150, height: 100),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 500),
-                transitionBuilder: (widget, animation) => ScaleTransition(
-                  scale: animation,
-                  child: widget,
-                ),
-                child: selectedOption == Option.LogIn
-                    ? LogIn(
-                        onSignUpSelected: () {
-                          setState(() {
-                            selectedOption = Option.SignUp;
-                          });
-                        },
-                      )
-                    : SignUp(onLogInSelected: () {
-                        setState(() {
-                          selectedOption = Option.LogIn;
-                        });
-                      }),
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Image.network('assets/images/Trello_logo.png',
+                          width: 200, height: 40)),
+                  AnimatedSwitcher(
+                    duration: Duration(milliseconds: 500),
+                    transitionBuilder: (widget, animation) => ScaleTransition(
+                      scale: animation,
+                      child: widget,
+                    ),
+                    child: selectedOption == Option.LogIn
+                        ? LogIn(
+                            onSignUpSelected: () {
+                              setState(() {
+                                selectedOption = Option.SignUp;
+                              });
+                            },
+                          )
+                        : SignUp(onLogInSelected: () {
+                            setState(() {
+                              selectedOption = Option.LogIn;
+                            });
+                          }),
+                  ),
+                ],
               ),
-            )
+            ),
           ],
         ),
       ),
