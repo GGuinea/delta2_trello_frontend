@@ -14,127 +14,149 @@ class LogIn extends StatefulWidget {
 }
 
 class _LogInState extends State<LogIn> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return Padding(
-      padding: EdgeInsets.all(size.height > 770
-          ? 64
-          : size.height > 670
-              ? 32
-              : 16),
-      child: Center(
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          )),
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 200),
-            height: size.height *
-                (size.height > 770
-                    ? 0.65
-                    : size.height > 670
-                        ? 0.75
-                        : 0.85),
-            width: 400,
-            color: Colors.white24,
-            child: Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Log in to Trello",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.grey[700],
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: EdgeInsets.all(size.height > 770
+            ? 64
+            : size.height > 670
+                ? 32
+                : 16),
+        child: Center(
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            )),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 200),
+              height: size.height *
+                  (size.height > 770
+                      ? 0.65
+                      : size.height > 670
+                          ? 0.75
+                          : 0.85),
+              width: 400,
+              color: Colors.white24,
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Log in to Trello",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.grey[700],
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 64,
-                      ),
-                      TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                            hintText: 'Enter email',
-                            suffixIcon: Icon(
-                              Icons.mail_outline,
-                            )),
-                      ),
-                      SizedBox(
-                        height: 32,
-                      ),
-                      TextField(
-                          controller: passwordController,
-                          obscureText: true,
+                        SizedBox(
+                          height: 64,
+                        ),
+                        TextFormField(
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return "Email is required";
+                            } else if (!value.contains('@')) {
+                              return "Invalid email";
+                            }
+                            return null;
+                          },
+                          controller: emailController,
                           decoration: InputDecoration(
-                              hintText: 'Enter password',
+                              hintText: 'Enter email',
+                              //helperText: "yes yes",
                               suffixIcon: Icon(
-                                Icons.lock_outline,
-                              ))),
-                      SizedBox(
-                        height: 64,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          print('Log in');
-                          print('Email : ' + emailController.text);
-                          print('Password : ' + passwordController.text);
-                        },
-                        child: Container(
-                          height: 50,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10),
+                                Icons.mail_outline,
+                              )),
+                        ),
+                        SizedBox(
+                          height: 32,
+                        ),
+                        TextFormField(
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return "Password is required";
+                              }
+                              return null;
+                            },
+                            controller: passwordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                                hintText: 'Enter password',
+                                suffixIcon: Icon(
+                                  Icons.lock_outline,
+                                ))),
+                        SizedBox(
+                          height: 64,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            if (_formKey.currentState.validate()) {
+                              print('Log in');
+                              print('Email : ' + emailController.text);
+                              print('Password : ' + passwordController.text);
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
                             ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "Log in",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            child: Center(
+                              child: Text(
+                                "Log in",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 32,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          widget.onSignUpSelected();
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sign up for an account',
-                              style: TextStyle(
+                        SizedBox(
+                          height: 32,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            widget.onSignUpSelected();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Sign up for an account',
+                                style: TextStyle(
+                                  color: kPrimaryColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Icon(
+                                Icons.arrow_right_alt_outlined,
                                 color: kPrimaryColor,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 8,
-                            ),
-                            Icon(
-                              Icons.arrow_right_alt_outlined,
-                              color: kPrimaryColor,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
