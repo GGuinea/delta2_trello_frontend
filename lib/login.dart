@@ -23,11 +23,7 @@ class _LogInState extends State<LogIn> {
     return Form(
       key: _formKey,
       child: Padding(
-        padding: EdgeInsets.all(size.height > 770
-            ? 64
-            : size.height > 670
-                ? 32
-                : 16),
+        padding: EdgeInsets.all(size.height > 770  ? 64 : size.height > 670 ? 32 : 16),
         child: Center(
           child: Card(
             elevation: 4,
@@ -37,14 +33,9 @@ class _LogInState extends State<LogIn> {
             )),
             child: AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              height: size.height *
-                  (size.height > 770
-                      ? 0.65
-                      : size.height > 670
-                          ? 0.75
-                          : 0.85),
+              height: size.height * (size.height > 770 ? 0.65 : size.height > 670 ? 0.75 : 0.85),
               width: 400,
-              color: Colors.white24,
+              color: backgroundColor,
               child: Center(
                 child: SingleChildScrollView(
                   child: Padding(
@@ -74,7 +65,6 @@ class _LogInState extends State<LogIn> {
                           controller: emailController,
                           decoration: InputDecoration(
                               hintText: 'Enter email',
-                              //helperText: "yes yes",
                               suffixIcon: Icon(
                                 Icons.mail_outline,
                               )),

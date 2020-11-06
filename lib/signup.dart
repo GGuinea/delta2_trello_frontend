@@ -25,11 +25,7 @@ class _SignUpState extends State<SignUp> {
     return Form(
       key: _formKey,
       child: Padding(
-        padding: EdgeInsets.all(size.height > 770
-            ? 64
-            : size.height > 670
-                ? 32
-                : 16),
+        padding: EdgeInsets.all(size.height > 770 ? 64 : size.height > 670 ? 32 : 16),
         child: Center(
           child: Card(
             elevation: 4,
@@ -39,14 +35,9 @@ class _SignUpState extends State<SignUp> {
             )),
             child: AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              height: size.height *
-                  (size.height > 770
-                      ? 0.65
-                      : size.height > 670
-                          ? 0.75
-                          : 0.85),
+              height: size.height * (size.height > 770 ? 0.65 : size.height > 670 ? 0.75 : 0.85),
               width: 400,
-              color: Colors.white24,
+              color: backgroundColor,
               child: Center(
                 child: SingleChildScrollView(
                   child: Padding(

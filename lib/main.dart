@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   height: double.infinity,
                   width: size.width,
-                  color: Colors.white24,
+                  color: backgroundColor,
                 )
               ],
             ),
