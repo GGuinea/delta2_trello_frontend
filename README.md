@@ -1,6 +1,9 @@
 # delta2_trello_frontend
 
-A new Flutter project.
+
+Link to the application:  
+
+https://deltatrello-11d65.web.app/#/
 
 ## Getting Started
 
