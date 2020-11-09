@@ -1,4 +1,5 @@
 import 'package:delta2_trello_frontend/constants.dart';
+import 'package:delta2_trello_frontend/boards.dart';
 import 'package:flutter/material.dart';
 
 TextEditingController emailController = new TextEditingController();
@@ -95,6 +96,11 @@ class _LogInState extends State<LogIn> {
                               print('Log in');
                               print('Email : ' + emailController.text);
                               print('Password : ' + passwordController.text);
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Boards()),
+                              );
                             }
                           },
                           child: Container(
