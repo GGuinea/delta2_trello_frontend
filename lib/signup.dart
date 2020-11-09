@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:delta2_trello_frontend/constants.dart';
+import 'package:delta2_trello_frontend/http_service.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 
 TextEditingController emailController = new TextEditingController();
-TextEditingController fullNameController = new TextEditingController();
+TextEditingController usernameController = new TextEditingController();
 TextEditingController passwordController = new TextEditingController();
 TextEditingController passwordConfirmController = new TextEditingController();
 
@@ -17,6 +21,8 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
+  String _error;
+  String _information;
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +59,58 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
                         SizedBox(
-                          height: 32,
+                          height: 16,
+                        ),
+                        _information == null
+                            ? Container()
+                            : GestureDetector(
+                                onTap: () {
+                                  widget.onLogInSelected();
+                                },
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          _information,
+                                          style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Log In',
+                                          style: TextStyle(
+                                            color: Colors.green,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Icon(
+                                          Icons.arrow_right_alt_outlined,
+                                          color: Colors.green,
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        SizedBox(
+                          height: 16,
                         ),
                         TextFormField(
                           validator: (value) {
                             if (value.isEmpty) {
                               return "Email is required";
-                            } else if (!value.contains('@')) {
+                            } else if (!EmailValidator.validate(value)) {
                               return "Invalid email";
                             }
                             return null;
@@ -76,12 +127,12 @@ class _SignUpState extends State<SignUp> {
                         ),
                         TextFormField(
                           validator: (value) {
-                            if (value.isEmpty) return "Full name is required";
+                            if (value.isEmpty) return "Username is required";
                             return null;
                           },
-                          controller: fullNameController,
+                          controller: usernameController,
                           decoration: InputDecoration(
-                              hintText: 'Enter full name',
+                              hintText: 'Enter username',
                               suffixIcon: Icon(
                                 Icons.person_outline,
                               )),
@@ -93,6 +144,11 @@ class _SignUpState extends State<SignUp> {
                             validator: (value) {
                               if (value.isEmpty)
                                 return "Password is required";
+                              else if (value.length < 8)
+                                return "Passwords must contains 8 characters";
+                              else if (!validatePassword(value))
+                                return "Password must contain upper and lower case letters,\n"
+                                    "numbers and a special characters[!@#\$&*~].";
                               else if (value != passwordConfirmController.text)
                                 return "Passwords are different";
                               return null;
@@ -100,10 +156,11 @@ class _SignUpState extends State<SignUp> {
                             controller: passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
-                                hintText: 'Enter password',
-                                suffixIcon: Icon(
-                                  Icons.lock_outline,
-                                ))),
+                              hintText: 'Enter password',
+                              suffixIcon: Icon(
+                                Icons.lock_outline,
+                              ),
+                            )),
                         SizedBox(
                           height: 16,
                         ),
@@ -125,13 +182,39 @@ class _SignUpState extends State<SignUp> {
                         SizedBox(
                           height: 32,
                         ),
+                        _error == null
+                            ? Container()
+                            : Text(
+                                _error,
+                                style: TextStyle(color: Colors.red, fontSize: 16),
+                              ),
+                        SizedBox(
+                          height: 32,
+                        ),
                         GestureDetector(
                           onTap: () {
                             if (_formKey.currentState.validate()) {
-                              print('Sign Up');
-                              print('Email : ' + emailController.text);
-                              print('Full name : ' + fullNameController.text);
-                              print('Password : ' + passwordController.text);
+                              final String email = emailController.text;
+                              final String username = usernameController.text;
+                              final String password = passwordController.text;
+                              signUp(email, username, password).then((response) {
+                                if (response.statusCode == 200) {
+                                  if (response.body.contains("error")) {
+                                    setState(() {
+                                      _error = jsonDecode(response.body)['error'];
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _information = jsonDecode(response.body)['status'];
+                                      _error = null;
+                                    });
+                                  }
+                                } else {
+                                  setState(() {
+                                    _error = response.body;
+                                  });
+                                }
+                              });
                             }
                           },
                           child: Container(
@@ -193,4 +276,10 @@ class _SignUpState extends State<SignUp> {
       ),
     );
   }
+}
+
+bool validatePassword(String value) {
+  String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~])';
+  RegExp regExp = new RegExp(pattern);
+  return regExp.hasMatch(value);
 }
