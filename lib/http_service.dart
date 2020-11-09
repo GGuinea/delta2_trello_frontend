@@ -13,3 +13,9 @@ Future<http.Response> signUp(String email, String username, String password) asy
       body: {"email": email, "username": username, "password": password});
   return response;
 }
+
+Future<http.Response> getAllBoards(String token) async {
+  http.Response response = await http.get('$url' + "/api/v1/all_boards",
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}

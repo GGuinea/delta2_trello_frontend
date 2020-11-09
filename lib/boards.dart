@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'constants.dart';
+import 'http_service.dart';
 
 class Boards extends StatefulWidget {
   @override
@@ -9,7 +12,7 @@ class Boards extends StatefulWidget {
 }
 
 class _BoardsState extends State<Boards> {
-  List<String> boards = [];
+  List boards = [];
   TextEditingController _boardNameTextController = TextEditingController();
 
   @override
@@ -18,6 +21,23 @@ class _BoardsState extends State<Boards> {
       body: _buildBoards(),
       backgroundColor: kPrimaryColor,
     );
+  }
+
+  @override
+  initState() {
+    super.initState();
+    fetchBoards();
+  }
+
+  fetchBoards() {
+    getAllBoards(userToken).then((response) => {
+      if (response.statusCode == 200)
+        {
+          setState(() {
+            boards.addAll(jsonDecode(response.body)['boards']);
+          })
+        }
+    });
   }
 
   _buildBoards() {
@@ -62,7 +82,7 @@ class _BoardsState extends State<Boards> {
               alignment: Alignment.topLeft,
               margin: EdgeInsets.all(10),
               child: Text(
-                boards[index],
+                  boards[index]['name'].toString(),
                 style: TextStyle(fontSize: 18),
               ),
             ),
