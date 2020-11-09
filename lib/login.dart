@@ -1,10 +1,8 @@
 import 'dart:convert';
 
+import 'package:delta2_trello_frontend/boards.dart';
 import 'package:delta2_trello_frontend/constants.dart';
 import 'package:delta2_trello_frontend/http_service.dart';
-import 'package:delta2_trello_frontend/test_page.dart';
-import 'package:delta2_trello_frontend/user_model.dart';
-import 'package:delta2_trello_frontend/boards.dart';
 import 'package:flutter/material.dart';
 
 TextEditingController usernameController = new TextEditingController();
