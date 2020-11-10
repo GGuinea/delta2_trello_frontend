@@ -136,7 +136,7 @@ class _BoardsState extends State<Boards> {
   }
 
   _addBoard(String boardName) {
-    boards.add(boardName);
+    boards.add(jsonDecode("{\"name\":\"" + boardName + "\"}"));
     _boardNameTextController.clear();
     setState(() {});
   }
