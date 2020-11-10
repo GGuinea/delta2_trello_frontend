@@ -4,9 +4,16 @@ import 'package:delta2_trello_frontend/boards.dart';
 import 'package:delta2_trello_frontend/constants.dart';
 import 'package:delta2_trello_frontend/http_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 TextEditingController usernameController = new TextEditingController();
 TextEditingController passwordController = new TextEditingController();
+
+GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: <String>[
+    'email',
+  ],
+);
 
 class LogIn extends StatefulWidget {
   final Function onSignUpSelected;
@@ -21,6 +28,53 @@ class _LogInState extends State<LogIn> {
   final _formKey = GlobalKey<FormState>();
 
   String _error;
+  GoogleSignInAccount _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+      setState(() {
+        _currentUser = account;
+      });
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<void> _handleSignIn() async {
+    try {
+      await _googleSignIn.signIn().then((googleUser) {
+        if (googleUser != null) {
+          signUp(googleUser.email, googleUser.displayName, googleUser.id).then((response) {
+            if (response.statusCode == 200) {
+              login(googleUser.displayName, googleUser.id).then((response) {
+                if (response.statusCode == 200) {
+                  if (response.body.contains("error")) {
+                    setState(() {
+                      _error = json.decode(response.body)['error'];
+                    });
+                  } else {
+                    userToken = jsonDecode(response.body)['token'];
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return Boards();
+                    }));
+                  }
+                }
+              });
+            } else {
+              setState(() {
+                _error = response.body;
+              });
+            }
+          });
+        }
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<void> _handleSignOut() => _googleSignIn.disconnect();
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +200,31 @@ class _LogInState extends State<LogIn> {
                                 ),
                               ),
                             ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 32,
+                        ),
+                        RaisedButton(
+                          onPressed: _handleSignIn,
+                          color: Colors.white,
+                          hoverColor: Colors.white,
+                          child: Container(
+                            height: 25,
+                            width: double.infinity,
+                            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              Image.network('assets/images/google_icon.png'),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Text(
+                                "Continue with Google",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ]),
                           ),
                         ),
                         SizedBox(
