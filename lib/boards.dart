@@ -82,7 +82,7 @@ class _BoardsState extends State<Boards> {
               alignment: Alignment.topLeft,
               margin: EdgeInsets.all(10),
               child: Text(
-                  boards[index]['name'].toString(),
+                boards[index]['name'].toString(),
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -97,31 +97,39 @@ class _BoardsState extends State<Boards> {
         barrierDismissible: true,
         builder: (context) {
           return Dialog(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(hintText: "Board title"),
-                    controller: _boardNameTextController,
-                  ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: RaisedButton(
-                      onPressed: () {
-                        if (_boardNameTextController.text.trim() != "") {
-                          Navigator.of(context).pop();
-                          _addBoard(_boardNameTextController.text.trim());
-                        }
-                      },
-                      child: Text("Add board"),
+            child: SizedBox(
+              width: 500,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
+                      child: TextField(
+                        decoration: InputDecoration(hintText: "Board title"),
+                        controller: _boardNameTextController,
+                      ),
                     ),
                   ),
-                )
-              ],
+                  // Center(
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                      child: RaisedButton(
+                        onPressed: () {
+                          if (_boardNameTextController.text.trim() != "") {
+                            Navigator.of(context).pop();
+                            _addBoard(_boardNameTextController.text.trim());
+                          }
+                        },
+                        child: Text("Add board"),
+                      ),
+                    ),
+                  ),
+                  //)
+                ],
+              ),
             ),
           );
         });
