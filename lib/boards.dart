@@ -18,8 +18,28 @@ class _BoardsState extends State<Boards> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarOpacity: 0.7,
+        centerTitle: true,
+        title: Image.asset(
+          'images/Trello_logo_white.png',
+          height: 32,
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.add_box_rounded,
+            ),
+            onPressed: () {
+              _showAddBoardDialog();
+            },
+            iconSize: 32,
+          )
+        ],
+      ),
       body: _buildBoards(),
-      backgroundColor: kPrimaryColor,
+      backgroundColor: Colors.white,
     );
   }
 
@@ -31,13 +51,13 @@ class _BoardsState extends State<Boards> {
 
   fetchBoards() {
     getAllBoards(userToken).then((response) => {
-      if (response.statusCode == 200)
-        {
-          setState(() {
-            boards.addAll(jsonDecode(response.body)['boards']);
-          })
-        }
-    });
+          if (response.statusCode == 200)
+            {
+              setState(() {
+                boards.addAll(jsonDecode(response.body)['boards']);
+              })
+            }
+        });
   }
 
   _buildBoards() {
