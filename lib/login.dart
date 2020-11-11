@@ -116,6 +116,8 @@ class _LogInState extends State<LogIn> {
                                   } else {
                                     userToken = jsonDecode(response.body)['token'];
                                     Navigator.pushNamed(context, '/boards');
+                                    passwordController.clear();
+                                    usernameController.clear();
                                   }
                                 } else {
                                   setState(() {
