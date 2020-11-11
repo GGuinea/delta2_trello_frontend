@@ -115,9 +115,7 @@ class _LogInState extends State<LogIn> {
                                     });
                                   } else {
                                     userToken = jsonDecode(response.body)['token'];
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                      return Boards();
-                                    }));
+                                    Navigator.pushNamed(context, '/boards');
                                   }
                                 } else {
                                   setState(() {
