@@ -49,21 +49,19 @@ class _LogInState extends State<LogIn> {
             if (response.statusCode == 200) {
               login(googleUser.displayName, googleUser.id).then((response) {
                 if (response.statusCode == 200) {
-                  if (response.body.contains("error")) {
-                    setState(() {
-                      _error = json.decode(response.body)['error'];
-                    });
-                  } else {
                     userToken = jsonDecode(response.body)['token'];
                     Navigator.push(context, MaterialPageRoute(builder: (context) {
                       return Boards();
                     }));
-                  }
+                } else {
+                  setState(() {
+                    _error = json.decode(response.body)['error'];
+                  });
                 }
               });
             } else {
               setState(() {
-                _error = response.body;
+                _error = json.decode(response.body)['error'];
               });
             }
           });
@@ -163,19 +161,13 @@ class _LogInState extends State<LogIn> {
                               final String password = passwordController.text;
                               login(username, password).then((response) {
                                 if (response.statusCode == 200) {
-                                  if (response.body.contains("error")) {
-                                    setState(() {
-                                      _error = json.decode(response.body)['error'];
-                                    });
-                                  } else {
                                     userToken = jsonDecode(response.body)['token'];
                                     Navigator.pushNamed(context, '/boards');
                                     passwordController.clear();
                                     usernameController.clear();
-                                  }
                                 } else {
                                   setState(() {
-                                    _error = response.body;
+                                    _error = json.decode(response.body)['error'];
                                   });
                                 }
                               });

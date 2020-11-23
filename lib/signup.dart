@@ -199,19 +199,13 @@ class _SignUpState extends State<SignUp> {
                               final String password = passwordController.text;
                               signUp(email, username, password).then((response) {
                                 if (response.statusCode == 200) {
-                                  if (response.body.contains("error")) {
-                                    setState(() {
-                                      _error = jsonDecode(response.body)['error'];
-                                    });
-                                  } else {
                                     setState(() {
                                       _information = jsonDecode(response.body)['status'];
                                       _error = null;
                                     });
-                                  }
                                 } else {
                                   setState(() {
-                                    _error = response.body;
+                                    _error = json.decode(response.body)['error'];
                                   });
                                 }
                               });
