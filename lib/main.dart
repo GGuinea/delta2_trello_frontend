@@ -1,3 +1,4 @@
+import 'package:delta2_trello_frontend/board.dart';
 import 'package:delta2_trello_frontend/boards.dart';
 import 'package:delta2_trello_frontend/login.dart';
 import 'package:delta2_trello_frontend/signup.dart';
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: HomePage(),
       routes: {
-        '/boards' : (context) => Boards()
+        '/boards' : (context) => Boards(),
+        '/board' : (context) => Board()
       },
     );
   }

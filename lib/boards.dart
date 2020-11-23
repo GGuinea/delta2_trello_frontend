@@ -92,6 +92,9 @@ class _BoardsState extends State<Boards> {
           );
         else
           return InkWell(
+            onTap: (){
+              Navigator.pushNamed(context, '/board');
+            },
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
