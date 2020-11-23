@@ -12,6 +12,9 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
+    Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    //if (arguments != null) print(arguments['board']['id'].toString());
+
     return Scaffold(
         appBar: AppBar(
           toolbarOpacity: 0.7,

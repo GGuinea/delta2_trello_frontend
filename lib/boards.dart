@@ -93,7 +93,7 @@ class _BoardsState extends State<Boards> {
         else
           return InkWell(
             onTap: (){
-              Navigator.pushNamed(context, '/board');
+              Navigator.pushNamed(context, '/board', arguments:{'board': boards[index]});
             },
             child: Container(
               decoration: BoxDecoration(
