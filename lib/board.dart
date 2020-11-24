@@ -1,5 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:delta2_trello_frontend/http_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'constants.dart';
 
 class Board extends StatefulWidget {
   @override
@@ -9,11 +15,40 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   List<String> lists = ["List one", "List two"];
   TextEditingController _listNameTextController = TextEditingController();
+  TextEditingController descriptionController;
+  Timer searchOnStoppedTyping;
+  int _id;
+  String _boardName;
+  String _description;
+  bool viewVisible = false;
+  double _menu = 0;
+
+  _onChangeHandler(name) {
+    const duration = Duration(milliseconds: 1000);
+    if (searchOnStoppedTyping != null) {
+      setState(() => searchOnStoppedTyping.cancel());
+    }
+    setState(() => searchOnStoppedTyping = new Timer(duration,
+        () => name.toString().isNotEmpty
+            ? changeBoardName(userToken, name, _id).then((response) => {
+              if (response.statusCode == 202)
+                _boardName = jsonDecode(response.body)['name']
+            }) : print("Empty String")));
+  }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     Map arguments = ModalRoute.of(context).settings.arguments as Map;
-    //if (arguments != null) print(arguments['board']['id'].toString());
+    if (arguments != null) {
+      _id = arguments['board']['id'];
+      _boardName = arguments['board']['name'];
+
+      getDetailsBoard(userToken, _id).then((response) => {
+            _description = jsonDecode(response.body)['description'],
+          });
+    }
+    descriptionController = new TextEditingController(text: _description);
 
     return Scaffold(
         appBar: AppBar(
@@ -25,15 +60,86 @@ class _BoardState extends State<Board> {
           ),
           automaticallyImplyLeading: false,
         ),
-        body: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: lists.length + 1,
-          itemBuilder: (context, index) {
-            if (index == lists.length)
-              return _buildAddListButton(context);
-            else
-              return _buildLists(context, index);
-          },
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black12),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                        child: SizedBox(
+                          width: 300,
+                          child: TextFormField(
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                            initialValue: _boardName,
+                            onChanged: _onChangeHandler,
+                            decoration: new InputDecoration(border: InputBorder.none),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        child: RaisedButton(
+                          onPressed: () {
+                            if (viewVisible) {
+                              setState(() {
+                                viewVisible = false;
+                                _menu = 0;
+                              });
+                            } else {
+                              setState(() {
+                                viewVisible = true;
+                                _menu = 300;
+                              });
+                            }
+                          },
+                          textColor: Colors.black54,
+                          padding: const EdgeInsets.all(0.0),
+                          child: Container(
+                            decoration: const BoxDecoration(color: Colors.white54),
+                            padding: const EdgeInsets.all(5.0),
+                            child: const Text('Show menu', style: TextStyle(fontSize: 14)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    height: size.height,
+                    width: size.width - _menu,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: lists.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == lists.length)
+                          return _buildAddListButton(context);
+                        else
+                          return _buildLists(context, index);
+                      },
+                    ),
+                  ),
+                  _buildMenu(context),
+                ],
+              ),
+            ],
+          ),
         ));
   }
 
@@ -49,7 +155,7 @@ class _BoardState extends State<Board> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(5.0),
             child: Text(
               lists[index],
               style: TextStyle(
@@ -59,6 +165,117 @@ class _BoardState extends State<Board> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  SizedBox _buildMenu(context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height,
+      width: _menu,
+      child: Visibility(
+        visible: viewVisible,
+        child: Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.black12), color: Colors.white),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          viewVisible = false;
+                          _menu = 0;
+                        });
+                      },
+                      child: Icon(Icons.arrow_back),
+                    ),
+                    SizedBox(
+                      width: 90,
+                    ),
+                    Text("Menu", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  ],
+                ),
+                Container(
+                  decoration: BoxDecoration(border: Border.all(color: Colors.teal)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.dashboard,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              "About this board",
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            )
+                          ],
+                        ),
+                        TextFormField(
+                          controller: descriptionController,
+                          maxLines: 6,
+                          decoration: InputDecoration(
+                              border: new OutlineInputBorder(
+                                  borderSide: new BorderSide(color: Colors.teal)),
+                              hintText: 'Enter details about board'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FlatButton(
+                            child: new Text("Save"),
+                            color: Colors.lightGreenAccent,
+                            onPressed: () {
+                              changeBoardDescription(userToken, descriptionController.text, _id)
+                                  .then((response) => {
+                                    if (response.statusCode == 202) {
+                                      print("Description changed")
+                                    }});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: RaisedButton(
+                    onPressed: () {
+                      _showDialog();
+                    },
+                    textColor: Colors.black54,
+                    padding: const EdgeInsets.all(0.0),
+                    child: Container(
+                      decoration: const BoxDecoration(color: Colors.white54),
+                      padding: const EdgeInsets.all(5.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text("Delete board")
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -78,7 +295,7 @@ class _BoardState extends State<Board> {
               color: Colors.white,
             ),
             margin: EdgeInsets.all(16.0),
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(5.0),
             child: Row(
               children: <Widget>[
                 Icon(
@@ -144,5 +361,32 @@ class _BoardState extends State<Board> {
     lists.add(listName);
     _listNameTextController.clear();
     setState(() {});
+  }
+
+  _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("Delete this board ?", textAlign: TextAlign.center),
+          actions: [
+            FlatButton(
+              child: new Text("Yes"),
+              onPressed: () {
+                deleteBoard(userToken, _id).then((response) => {
+                      if (response.statusCode == 200) {Navigator.pushNamed(context, '/boards')}
+                    });
+              },
+            ),
+            FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
