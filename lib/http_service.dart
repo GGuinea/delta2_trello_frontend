@@ -52,3 +52,10 @@ Future<http.Response> createBoard(String token, String name, String description)
       body: {"name": name, "description": description});
   return response;
 }
+
+Future<http.Response> addMember(String token, int boardId, String email) async {
+  http.Response response = await http.patch('$url' + "/api/v1/board/add_member/" + '$boardId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {"email": email});
+  return response;
+}

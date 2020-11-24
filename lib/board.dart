@@ -15,6 +15,7 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   List<String> lists = ["List one", "List two"];
   TextEditingController _listNameTextController = TextEditingController();
+  TextEditingController _memberEmailTextController = TextEditingController();
   TextEditingController descriptionController;
   Timer searchOnStoppedTyping;
   int _id;
@@ -71,7 +72,6 @@ class _BoardState extends State<Board> {
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
@@ -88,8 +88,22 @@ class _BoardState extends State<Board> {
                           ),
                         ),
                       ),
+                      Spacer(),
+                      RaisedButton(
+                        onPressed: () {
+                          _showAddMemberDialog();
+                        },
+                        textColor: Colors.black54,
+                        color: Colors.white54,
+                        hoverColor: Colors.lightGreenAccent,
+                        child: Container(
+                          padding: const EdgeInsets.all(5.0),
+                          child: const Text('Invite',
+                              style: TextStyle(fontSize: 14)),
+                        ),
+                      ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                         child: RaisedButton(
                           onPressed: () {
                             if (viewVisible) {
@@ -105,9 +119,9 @@ class _BoardState extends State<Board> {
                             }
                           },
                           textColor: Colors.black54,
+                          color: Colors.white54,
                           padding: const EdgeInsets.all(0.0),
                           child: Container(
-                            decoration: const BoxDecoration(color: Colors.white54),
                             padding: const EdgeInsets.all(5.0),
                             child: const Text('Show menu', style: TextStyle(fontSize: 14)),
                           ),
@@ -388,5 +402,60 @@ class _BoardState extends State<Board> {
         );
       },
     );
+  }
+
+  _showAddMemberDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return Dialog(
+            child: SizedBox(
+              width: 500,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
+                      child: TextField(
+                        decoration: InputDecoration(hintText: "User email"),
+                        controller: _memberEmailTextController,
+                      ),
+                    ),
+                  ),
+                  // Center(
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                      child: RaisedButton(
+                        onPressed: () {
+                          if (_memberEmailTextController.text.trim() != "") {
+                            _addMember(_memberEmailTextController.text.trim());
+                          }
+                        },
+                        child: Text("Add user"),
+                      ),
+                    ),
+                  ),
+                  //)
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  _addMember(String email) {
+    addMember(userToken, _id, email).then((response) => {
+          if (response.statusCode == 200)
+            {
+              setState(() {
+                Navigator.of(context).pop();
+                _memberEmailTextController.clear();
+              })
+            }
+        });
   }
 }
