@@ -45,3 +45,10 @@ Future<http.Response> getDetailsBoard(String token, int id) async {
       .get('$url' + "/api/v1/board/" + '$id', headers: {"Authorization": "Bearer " + token});
   return response;
 }
+
+Future<http.Response> createBoard(String token, String name, String description) async {
+  http.Response response = await http.post('$url' + "/api/v1/boards",
+      headers: {"Authorization": "Bearer " + token},
+      body: {"name": name, "description": description});
+  return response;
+}
