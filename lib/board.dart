@@ -14,7 +14,9 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   List<String> lists = ["List one", "List two"];
+  List members = [];
   TextEditingController _listNameTextController = TextEditingController();
+  TextEditingController _memberEmailTextController = TextEditingController();
   TextEditingController descriptionController;
   Timer searchOnStoppedTyping;
   int _id;
@@ -22,6 +24,7 @@ class _BoardState extends State<Board> {
   String _description;
   bool viewVisible = false;
   double _menu = 0;
+  bool firstFetch = true;
 
   _onChangeHandler(name) {
     const duration = Duration(milliseconds: 1000);
@@ -44,6 +47,7 @@ class _BoardState extends State<Board> {
       _id = arguments['board']['id'];
       _boardName = arguments['board']['name'];
 
+      if (firstFetch) _fetchMembers();
       getDetailsBoard(userToken, _id).then((response) => {
             _description = jsonDecode(response.body)['description'],
           });
@@ -71,10 +75,9 @@ class _BoardState extends State<Board> {
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                         child: SizedBox(
                           width: 300,
                           child: TextFormField(
@@ -88,8 +91,64 @@ class _BoardState extends State<Board> {
                           ),
                         ),
                       ),
+                      Container(
+                        width: 300,
+                        height: 50,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: members.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                                margin: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(blurRadius: 3, color: Colors.grey)
+                                  ],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  color: Colors.white,
+                                ),
+                                child: Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          members[index]['username'],
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        FlatButton(
+                                          onPressed: () {
+                                            _deleteMember(members[index]['id']);
+                                          },
+                                          child: Icon(
+                                            Icons.delete,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    )));
+                          },
+                        ),
+                      ),
+                      Spacer(),
+                      RaisedButton(
+                        onPressed: () {
+                          _showAddMemberDialog();
+                        },
+                        textColor: Colors.black54,
+                        color: Colors.white54,
+                        hoverColor: Colors.lightGreenAccent,
+                        child: Container(
+                          padding: const EdgeInsets.all(5.0),
+                          child: const Text('Invite',
+                              style: TextStyle(fontSize: 14)),
+                        ),
+                      ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                         child: RaisedButton(
                           onPressed: () {
                             if (viewVisible) {
@@ -105,9 +164,9 @@ class _BoardState extends State<Board> {
                             }
                           },
                           textColor: Colors.black54,
+                          color: Colors.white54,
                           padding: const EdgeInsets.all(0.0),
                           child: Container(
-                            decoration: const BoxDecoration(color: Colors.white54),
                             padding: const EdgeInsets.all(5.0),
                             child: const Text('Show menu', style: TextStyle(fontSize: 14)),
                           ),
@@ -225,7 +284,8 @@ class _BoardState extends State<Board> {
                           maxLines: 6,
                           decoration: InputDecoration(
                               border: new OutlineInputBorder(
-                                  borderSide: new BorderSide(color: Colors.teal)),
+                                  borderSide:
+                                      new BorderSide(color: Colors.teal)),
                               hintText: 'Enter details about board'),
                         ),
                         Padding(
@@ -388,5 +448,82 @@ class _BoardState extends State<Board> {
         );
       },
     );
+  }
+
+  _showAddMemberDialog() {
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return Dialog(
+            child: SizedBox(
+              width: 500,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
+                      child: TextField(
+                        decoration: InputDecoration(hintText: "User email"),
+                        controller: _memberEmailTextController,
+                      ),
+                    ),
+                  ),
+                  // Center(
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                      child: RaisedButton(
+                        onPressed: () {
+                          if (_memberEmailTextController.text.trim() != "") {
+                            _addMember(_memberEmailTextController.text.trim());
+                          }
+                        },
+                        child: Text("Add user"),
+                      ),
+                    ),
+                  ),
+                  //)
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  _addMember(String email) {
+    addMember(userToken, _id, email).then((response) => {
+          if (response.statusCode == 200)
+            {
+              setState(() {
+                Navigator.of(context).pop();
+                _memberEmailTextController.clear();
+                _fetchMembers();
+              })
+            }
+        });
+  }
+
+  _deleteMember(int userId){
+    deleteMember(userToken, _id, userId).then((response) => {
+      if (response.statusCode == 200)
+        {
+            _fetchMembers()
+        }
+    });
+  }
+
+  _fetchMembers() {
+    getMembers(userToken, _id).then((response) => {
+          if (response.statusCode == 200)
+            {
+              members.clear(),
+              members.addAll(jsonDecode(response.body)),
+              firstFetch = false,
+              setState(() {})
+            }
+        });
   }
 }

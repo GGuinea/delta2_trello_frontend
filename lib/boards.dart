@@ -92,8 +92,9 @@ class _BoardsState extends State<Boards> {
           );
         else
           return InkWell(
-            onTap: (){
-              Navigator.pushNamed(context, '/board', arguments:{'board': boards[index]});
+            onTap: () {
+              Navigator.pushNamed(context, '/board',
+                  arguments: {'board': boards[index]});
             },
             child: Container(
               decoration: BoxDecoration(
@@ -159,8 +160,14 @@ class _BoardsState extends State<Boards> {
   }
 
   _addBoard(String boardName) {
-    boards.add(jsonDecode("{\"name\":\"" + boardName + "\"}"));
-    _boardNameTextController.clear();
-    setState(() {});
+    createBoard(userToken, boardName, "empty").then((response) => {
+          if (response.statusCode == 201)
+            {
+              setState(() {
+                _boardNameTextController.clear();
+                boards.add(jsonDecode(response.body));
+              })
+            }
+        });
   }
 }
