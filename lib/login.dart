@@ -46,7 +46,8 @@ class _LogInState extends State<LogIn> {
       await _googleSignIn.signIn().then((googleUser) {
         if (googleUser != null) {
           signUp(googleUser.email, googleUser.displayName, googleUser.id).then((response) {
-            if (response.statusCode == 200) {
+            print(response.statusCode);
+            if (response.statusCode == 200 || response.statusCode == 409) {
               login(googleUser.displayName, googleUser.id).then((response) {
                 if (response.statusCode == 200) {
                     userToken = jsonDecode(response.body)['token'];
