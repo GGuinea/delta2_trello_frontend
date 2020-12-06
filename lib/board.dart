@@ -8,51 +8,40 @@ import 'package:flutter/material.dart';
 import 'constants.dart';
 
 class Board extends StatefulWidget {
+  final String username;
+  final int boardId;
+
+  const Board({Key key, this.username, this.boardId}) : super(key: key);
+
   @override
-  _BoardState createState() => _BoardState();
+  _BoardState createState() => _BoardState(username, boardId);
 }
 
 class _BoardState extends State<Board> {
+  final String username;
+  final int boardId;
   List<String> lists = ["List one", "List two"];
   List members = [];
   TextEditingController _listNameTextController = TextEditingController();
   TextEditingController _memberEmailTextController = TextEditingController();
-  TextEditingController descriptionController;
+  TextEditingController _descriptionController;
+  TextEditingController _changeTextController;
   Timer searchOnStoppedTyping;
-  int _id;
   String _boardName;
   String _description;
   bool viewVisible = false;
   double _menu = 0;
   bool firstFetch = true;
 
-  _onChangeHandler(name) {
-    const duration = Duration(milliseconds: 1000);
-    if (searchOnStoppedTyping != null) {
-      setState(() => searchOnStoppedTyping.cancel());
-    }
-    setState(() => searchOnStoppedTyping = new Timer(duration,
-        () => name.toString().isNotEmpty
-            ? changeBoardName(userToken, name, _id).then((response) => {
-              if (response.statusCode == 202)
-                _boardName = jsonDecode(response.body)['name']
-            }) : print("Empty String")));
-  }
+  _BoardState(this.username, this.boardId);
+
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    Map arguments = ModalRoute.of(context).settings.arguments as Map;
-    if (arguments != null) {
-      _id = arguments['board']['id'];
-      _boardName = arguments['board']['name'];
 
-      if (firstFetch) _fetchMembers();
-      getDetailsBoard(userToken, _id).then((response) => {
-            _description = jsonDecode(response.body)['description'],
-          });
-    }
-    descriptionController = new TextEditingController(text: _description);
+    if (firstFetch) _fetchMembers();
+    _descriptionController = new TextEditingController(text: _description);
 
     return Scaffold(
         appBar: AppBar(
@@ -79,14 +68,17 @@ class _BoardState extends State<Board> {
                       ConstrainedBox(
                         constraints: BoxConstraints(minWidth: 100),
                         child: IntrinsicWidth(
-                          child: TextFormField(
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                          child: InkWell(
+                            child: Text(
+                              _boardName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                             ),
-                            initialValue: _boardName,
-                            onChanged: _onChangeHandler,
-                            decoration: new InputDecoration(border: InputBorder.none),
+                            onTap: () {
+                              _showChangeBoardNameTextDialog();
+                            },
                           ),
                         ),
                       ),
@@ -101,9 +93,7 @@ class _BoardState extends State<Board> {
                               return Container(
                                   margin: EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(blurRadius: 3, color: Colors.grey)
-                                    ],
+                                    boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
                                     borderRadius: BorderRadius.circular(10.0),
                                     color: Colors.white,
                                   ),
@@ -133,6 +123,21 @@ class _BoardState extends State<Board> {
                           ),
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          onPressed: () {
+                            _showCreateLinkDialog("https://deltatrello-11d65.firebaseapp.com/#/invite/" + username + "/" + _boardName);
+                          },
+                          textColor: Colors.black54,
+                          color: Colors.white54,
+                          hoverColor: Colors.lightGreenAccent,
+                          child: Container(
+                            padding: const EdgeInsets.all(5.0),
+                            child: const Text('Create a link', style: TextStyle(fontSize: 14)),
+                          ),
+                        ),
+                      ),
                       //Spacer(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -145,8 +150,7 @@ class _BoardState extends State<Board> {
                           hoverColor: Colors.lightGreenAccent,
                           child: Container(
                             padding: const EdgeInsets.all(5.0),
-                            child: const Text('Invite',
-                                style: TextStyle(fontSize: 14)),
+                            child: const Text('Invite', style: TextStyle(fontSize: 14)),
                           ),
                         ),
                       ),
@@ -205,6 +209,21 @@ class _BoardState extends State<Board> {
         ));
   }
 
+  @override
+  initState() {
+    super.initState();
+    fetchBoard();
+  }
+
+  fetchBoard() {
+    getDetailsBoard(userToken, boardId).then((response) => {
+          setState(() {
+            _description = jsonDecode(response.body)['description'];
+            _boardName = jsonDecode(response.body)['name'];
+          }),
+        });
+  }
+
   Widget _buildLists(BuildContext context, int index) {
     return Container(
       width: 300.0,
@@ -218,12 +237,17 @@ class _BoardState extends State<Board> {
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
-            child: Text(
-              lists[index],
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+            child: InkWell(
+              child: Text(
+                lists[index],
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              onTap: () {
+                _showChangeNameListTextDialog(lists[index], index);
+              },
             ),
           ),
         ],
@@ -283,12 +307,11 @@ class _BoardState extends State<Board> {
                           ],
                         ),
                         TextFormField(
-                          controller: descriptionController,
+                          controller: _descriptionController,
                           maxLines: 6,
                           decoration: InputDecoration(
                               border: new OutlineInputBorder(
-                                  borderSide:
-                                      new BorderSide(color: Colors.teal)),
+                                  borderSide: new BorderSide(color: Colors.teal)),
                               hintText: 'Enter details about board'),
                         ),
                         Padding(
@@ -297,7 +320,7 @@ class _BoardState extends State<Board> {
                             child: new Text("Save"),
                             color: Colors.lightGreenAccent,
                             onPressed: () {
-                              changeBoardDescription(userToken, descriptionController.text, _id)
+                              changeBoardDescription(userToken, _descriptionController.text, boardId)
                                   .then((response) => {
                                     if (response.statusCode == 202) {
                                       print("Description changed")
@@ -436,8 +459,8 @@ class _BoardState extends State<Board> {
             FlatButton(
               child: new Text("Yes"),
               onPressed: () {
-                deleteBoard(userToken, _id).then((response) => {
-                      if (response.statusCode == 200) {Navigator.pushNamed(context, '/boards')}
+                deleteBoard(userToken, boardId).then((response) => {
+                      if (response.statusCode == 200) {Navigator.pushNamed(context, '/boards/'+username)}
                     });
               },
             ),
@@ -497,7 +520,7 @@ class _BoardState extends State<Board> {
   }
 
   _addMember(String email) {
-    addMember(userToken, _id, email).then((response) => {
+    addMember(userToken, boardId, email).then((response) => {
           if (response.statusCode == 200)
             {
               setState(() {
@@ -509,17 +532,14 @@ class _BoardState extends State<Board> {
         });
   }
 
-  _deleteMember(int userId){
-    deleteMember(userToken, _id, userId).then((response) => {
-      if (response.statusCode == 200)
-        {
-            _fetchMembers()
-        }
-    });
+  _deleteMember(int userId) {
+    deleteMember(userToken, boardId, userId).then((response) => {
+          if (response.statusCode == 200) {_fetchMembers()}
+        });
   }
 
   _fetchMembers() {
-    getMembers(userToken, _id).then((response) => {
+    getMembers(userToken, boardId).then((response) => {
           if (response.statusCode == 200)
             {
               members.clear(),
@@ -527,6 +547,95 @@ class _BoardState extends State<Board> {
               firstFetch = false,
               setState(() {})
             }
+        });
+  }
+
+  _showChangeNameListTextDialog(String text, int index) {
+    TextEditingController _changeTextController = TextEditingController(text: text);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Change name list: '),
+            content: TextField(
+              controller: _changeTextController,
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: new Text("Sumbit"),
+                onPressed: () {
+                  setState(() {
+                    lists[index] = _changeTextController.text;
+                    print(_changeTextController.text + '  ' + index.toString());
+                    Navigator.of(context).pop();
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  _showChangeBoardNameTextDialog() {
+    _changeTextController = new TextEditingController(text: _boardName);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Change board name : '),
+            content: TextField(
+              controller: _changeTextController,
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: new Text("Sumbit"),
+                onPressed: () {
+                  if(_changeTextController.text.isNotEmpty)
+                  changeBoardName(userToken, _changeTextController.text, boardId)
+                      .then((response) => {
+                        if(response.statusCode == 202)
+                            setState(() {
+                              _boardName = _changeTextController.text;
+                              Navigator.of(context).pop();
+                            })
+                          });
+                },
+              ),
+            ],
+          );
+        });
+  }
+  _showCreateLinkDialog(String link) {
+    _changeTextController = new TextEditingController(text: link);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Copy a link'),
+            content: TextField(
+              controller: _changeTextController,
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
         });
   }
 }

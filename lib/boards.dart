@@ -7,14 +7,18 @@ import 'constants.dart';
 import 'http_service.dart';
 
 class Boards extends StatefulWidget {
+  final String username;
+  const Boards({Key key, this.username}) : super(key: key);
   @override
-  _BoardsState createState() => _BoardsState();
+  _BoardsState createState() => _BoardsState(username);
 }
 
 class _BoardsState extends State<Boards> {
   List boards = [];
   TextEditingController _boardNameTextController = TextEditingController();
+  final String username;
 
+  _BoardsState(this.username);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,8 +97,7 @@ class _BoardsState extends State<Boards> {
         else
           return InkWell(
             onTap: () {
-              Navigator.pushNamed(context, '/board',
-                  arguments: {'board': boards[index]});
+              Navigator.pushNamed(context, "/board/"+username+"/"+boards[index]["id"].toString());
             },
             child: Container(
               decoration: BoxDecoration(

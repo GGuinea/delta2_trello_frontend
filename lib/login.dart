@@ -50,10 +50,10 @@ class _LogInState extends State<LogIn> {
             if (response.statusCode == 200 || response.statusCode == 409) {
               login(googleUser.displayName, googleUser.id).then((response) {
                 if (response.statusCode == 200) {
-                    userToken = jsonDecode(response.body)['token'];
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return Boards();
-                    }));
+                  userToken = jsonDecode(response.body)['token'];
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return Boards(username: googleUser.displayName);
+                  }));
                 } else {
                   setState(() {
                     _error = json.decode(response.body)['error'];
@@ -82,7 +82,11 @@ class _LogInState extends State<LogIn> {
     return Form(
       key: _formKey,
       child: Padding(
-        padding: EdgeInsets.all(size.height > 770  ? 64 : size.height > 670 ? 32 : 16),
+        padding: EdgeInsets.all(size.height > 770
+            ? 64
+            : size.height > 670
+                ? 32
+                : 16),
         child: Center(
           child: Card(
             elevation: 4,
@@ -92,7 +96,12 @@ class _LogInState extends State<LogIn> {
             )),
             child: AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              height: size.height * (size.height > 770 ? 0.65 : size.height > 670 ? 0.75 : 0.85),
+              height: size.height *
+                  (size.height > 770
+                      ? 0.65
+                      : size.height > 670
+                          ? 0.75
+                          : 0.85),
               width: 400,
               color: backgroundColor,
               child: Center(
@@ -162,10 +171,10 @@ class _LogInState extends State<LogIn> {
                               final String password = passwordController.text;
                               login(username, password).then((response) {
                                 if (response.statusCode == 200) {
-                                    userToken = jsonDecode(response.body)['token'];
-                                    Navigator.pushNamed(context, '/boards');
-                                    passwordController.clear();
-                                    usernameController.clear();
+                                  userToken = jsonDecode(response.body)['token'];
+                                  Navigator.pushNamed(context, "/boards/" + username);
+                                  passwordController.clear();
+                                  usernameController.clear();
                                 } else {
                                   setState(() {
                                     _error = json.decode(response.body)['error'];
