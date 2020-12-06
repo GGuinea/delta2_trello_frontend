@@ -53,159 +53,157 @@ class _BoardState extends State<Board> {
           ),
           automaticallyImplyLeading: false,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: 100),
-                        child: IntrinsicWidth(
-                          child: InkWell(
-                            child: Text(
-                              _boardName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
+        body: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: 100),
+                      child: IntrinsicWidth(
+                        child: InkWell(
+                          child: Text(
+                            _boardName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
-                            onTap: () {
-                              _showChangeBoardNameTextDialog();
-                            },
                           ),
+                          onTap: () {
+                            _showChangeBoardNameTextDialog();
+                          },
                         ),
                       ),
-                      Expanded(
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: members.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                                margin: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  color: Colors.white,
+                                ),
+                                child: Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          members[index]['username'],
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        FlatButton(
+                                          onPressed: () {
+                                            _deleteMember(members[index]['id']);
+                                          },
+                                          child: Icon(
+                                            Icons.delete,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    )));
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: RaisedButton(
+                        onPressed: () {
+                          _showCreateLinkDialog("https://deltatrello-11d65.firebaseapp.com/#/invite/" + username + "/" + _boardName);
+                        },
+                        textColor: Colors.black54,
+                        color: Colors.white54,
+                        hoverColor: Colors.lightGreenAccent,
                         child: Container(
-                          height: 50,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: members.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                  margin: EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                  ),
-                                  child: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            members[index]['username'],
-                                            style: TextStyle(
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          FlatButton(
-                                            onPressed: () {
-                                              _deleteMember(members[index]['id']);
-                                            },
-                                            child: Icon(
-                                              Icons.delete,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ],
-                                      )));
-                            },
-                          ),
+                          padding: const EdgeInsets.all(5.0),
+                          child: const Text('Create a link', style: TextStyle(fontSize: 14)),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: RaisedButton(
-                          onPressed: () {
-                            _showCreateLinkDialog("https://deltatrello-11d65.firebaseapp.com/#/invite/" + username + "/" + _boardName);
-                          },
-                          textColor: Colors.black54,
-                          color: Colors.white54,
-                          hoverColor: Colors.lightGreenAccent,
-                          child: Container(
-                            padding: const EdgeInsets.all(5.0),
-                            child: const Text('Create a link', style: TextStyle(fontSize: 14)),
-                          ),
+                    ),
+                    //Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: RaisedButton(
+                        onPressed: () {
+                          _showAddMemberDialog();
+                        },
+                        textColor: Colors.black54,
+                        color: Colors.white54,
+                        hoverColor: Colors.lightGreenAccent,
+                        child: Container(
+                          padding: const EdgeInsets.all(5.0),
+                          child: const Text('Invite', style: TextStyle(fontSize: 14)),
                         ),
                       ),
-                      //Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: RaisedButton(
-                          onPressed: () {
-                            _showAddMemberDialog();
-                          },
-                          textColor: Colors.black54,
-                          color: Colors.white54,
-                          hoverColor: Colors.lightGreenAccent,
-                          child: Container(
-                            padding: const EdgeInsets.all(5.0),
-                            child: const Text('Invite', style: TextStyle(fontSize: 14)),
-                          ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: RaisedButton(
+                        onPressed: () {
+                          if (viewVisible) {
+                            setState(() {
+                              viewVisible = false;
+                              _menu = 0;
+                            });
+                          } else {
+                            setState(() {
+                              viewVisible = true;
+                              _menu = 300;
+                            });
+                          }
+                        },
+                        textColor: Colors.black54,
+                        color: Colors.white54,
+                        hoverColor: Colors.lightGreenAccent,
+                        child: Container(
+                          padding: const EdgeInsets.all(5.0),
+                          child: const Text('Show menu', style: TextStyle(fontSize: 14)),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: RaisedButton(
-                          onPressed: () {
-                            if (viewVisible) {
-                              setState(() {
-                                viewVisible = false;
-                                _menu = 0;
-                              });
-                            } else {
-                              setState(() {
-                                viewVisible = true;
-                                _menu = 300;
-                              });
-                            }
-                          },
-                          textColor: Colors.black54,
-                          color: Colors.white54,
-                          padding: const EdgeInsets.all(0.0),
-                          child: Container(
-                            padding: const EdgeInsets.all(5.0),
-                            child: const Text('Show menu', style: TextStyle(fontSize: 14)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    height: size.height,
-                    width: size.width - _menu,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: lists.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == lists.length)
-                          return _buildAddListButton(context);
-                        else
-                          return _buildLists(context, index);
-                      },
-                    ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  height: size.height - 118,
+                  width: size.width - _menu,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: lists.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == lists.length)
+                        return _buildAddListButton(context);
+                      else
+                        return _buildLists(context, index);
+                    },
                   ),
-                  _buildMenu(context),
-                ],
-              ),
-            ],
-          ),
+                ),
+                _buildMenu(context),
+              ],
+            ),
+          ],
         ));
   }
 
@@ -257,7 +255,7 @@ class _BoardState extends State<Board> {
 
   SizedBox _buildMenu(context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height - 118,
       width: _menu,
       child: Visibility(
         visible: viewVisible,
