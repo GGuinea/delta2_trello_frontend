@@ -230,11 +230,15 @@ class _BoardState extends State<Board> {
 
   fetchBoard() {
     getDetailsBoard(window.localStorage['token'], boardId).then((response) => {
-          setState(() {
-            _description = jsonDecode(response.body)['description'];
-            _boardName = jsonDecode(response.body)['name'];
-          }),
-        });
+      if(response.statusCode == 200){
+        setState(() {
+          _description = jsonDecode(response.body)['description'];
+          _boardName = jsonDecode(response.body)['name'];
+        }),
+      }else{
+        Navigator.pushNamed(context, '/404')
+      }
+    });
   }
 
   Widget _buildLists(BuildContext context, int index) {
