@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:delta2_trello_frontend/http_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -214,7 +215,7 @@ class _BoardState extends State<Board> {
   }
 
   fetchBoard() {
-    getDetailsBoard(userToken, boardId).then((response) => {
+    getDetailsBoard(window.localStorage['token'], boardId).then((response) => {
           setState(() {
             _description = jsonDecode(response.body)['description'];
             _boardName = jsonDecode(response.body)['name'];
@@ -318,7 +319,7 @@ class _BoardState extends State<Board> {
                             child: new Text("Save"),
                             color: Colors.lightGreenAccent,
                             onPressed: () {
-                              changeBoardDescription(userToken, _descriptionController.text, boardId)
+                              changeBoardDescription(window.localStorage['token'], _descriptionController.text, boardId)
                                   .then((response) => {
                                     if (response.statusCode == 202) {
                                       print("Description changed")
@@ -457,7 +458,7 @@ class _BoardState extends State<Board> {
             FlatButton(
               child: new Text("Yes"),
               onPressed: () {
-                deleteBoard(userToken, boardId).then((response) => {
+                deleteBoard(window.localStorage['token'], boardId).then((response) => {
                       if (response.statusCode == 200) {Navigator.pushNamed(context, '/boards/'+username)}
                     });
               },
@@ -518,7 +519,7 @@ class _BoardState extends State<Board> {
   }
 
   _addMember(String email) {
-    addMember(userToken, boardId, email).then((response) => {
+    addMember(window.localStorage['token'], boardId, email).then((response) => {
           if (response.statusCode == 200)
             {
               setState(() {
@@ -531,13 +532,13 @@ class _BoardState extends State<Board> {
   }
 
   _deleteMember(int userId) {
-    deleteMember(userToken, boardId, userId).then((response) => {
+    deleteMember(window.localStorage['token'], boardId, userId).then((response) => {
           if (response.statusCode == 200) {_fetchMembers()}
         });
   }
 
   _fetchMembers() {
-    getMembers(userToken, boardId).then((response) => {
+    getMembers(window.localStorage['token'], boardId).then((response) => {
           if (response.statusCode == 200)
             {
               members.clear(),
@@ -601,7 +602,7 @@ class _BoardState extends State<Board> {
                 child: new Text("Sumbit"),
                 onPressed: () {
                   if(_changeTextController.text.isNotEmpty)
-                  changeBoardName(userToken, _changeTextController.text, boardId)
+                  changeBoardName(window.localStorage['token'], _changeTextController.text, boardId)
                       .then((response) => {
                         if(response.statusCode == 202)
                             setState(() {

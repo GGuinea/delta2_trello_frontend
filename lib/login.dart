@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:delta2_trello_frontend/boards.dart';
 import 'package:delta2_trello_frontend/constants.dart';
 import 'package:delta2_trello_frontend/http_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 TextEditingController usernameController = new TextEditingController();
 TextEditingController passwordController = new TextEditingController();
 
@@ -50,7 +50,7 @@ class _LogInState extends State<LogIn> {
             if (response.statusCode == 200 || response.statusCode == 409) {
               login(googleUser.displayName, googleUser.id).then((response) {
                 if (response.statusCode == 200) {
-                  userToken = jsonDecode(response.body)['token'];
+                  window.localStorage['token'] = jsonDecode(response.body)['token'];
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return Boards(username: googleUser.displayName);
                   }));
@@ -171,7 +171,7 @@ class _LogInState extends State<LogIn> {
                               final String password = passwordController.text;
                               login(username, password).then((response) {
                                 if (response.statusCode == 200) {
-                                  userToken = jsonDecode(response.body)['token'];
+                                  window.localStorage['token'] = jsonDecode(response.body)['token'];
                                   Navigator.pushNamed(context, "/boards/" + username);
                                   passwordController.clear();
                                   usernameController.clear();

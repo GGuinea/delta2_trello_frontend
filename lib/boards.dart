@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,7 @@ class _BoardsState extends State<Boards> {
   }
 
   fetchBoards() {
-    getAllBoards(userToken).then((response) => {
+    getAllBoards(window.localStorage['token']).then((response) => {
           if (response.statusCode == 200)
             {
               setState(() {
@@ -163,7 +164,7 @@ class _BoardsState extends State<Boards> {
   }
 
   _addBoard(String boardName) {
-    createBoard(userToken, boardName, "empty").then((response) => {
+    createBoard(window.localStorage['token'], boardName, "empty").then((response) => {
           if (response.statusCode == 201)
             {
               setState(() {

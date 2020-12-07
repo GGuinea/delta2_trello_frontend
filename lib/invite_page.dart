@@ -140,7 +140,7 @@ class _InvitePageState extends State<InvitePage> {
                                   final String password = passwordController.text;
                                   login(username, password).then((response) {
                                     if (response.statusCode == 200) {
-                                      userToken = jsonDecode(response.body)['token'];
+                                      window.localStorage['token'] = jsonDecode(response.body)['token'];
                                       Navigator.pushNamed(context, '/boards');
                                       passwordController.clear();
                                       usernameController.clear();
