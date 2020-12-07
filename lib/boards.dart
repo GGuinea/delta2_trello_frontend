@@ -71,7 +71,7 @@ class _BoardsState extends State<Boards> {
           if (response.statusCode == 200)
             {
               setState(() {
-                boards.addAll(jsonDecode(response.body)['boards']);
+                boards.addAll(jsonDecode(response.body));
               })
             }
         });

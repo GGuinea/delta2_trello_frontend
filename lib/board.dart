@@ -171,7 +171,8 @@ class _BoardState extends State<Board> {
                       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: RaisedButton(
                         onPressed: () {
-                          _showCreateLinkDialog("https://deltatrello-11d65.firebaseapp.com/#/invite/" + username + "/" + _boardName);
+                          String encoded = base64.encode(utf8.encode(username + "/#/" + _boardName + "/#/" + boardId.toString() ));
+                          _showCreateLinkDialog("https://deltatrello-11d65.firebaseapp.com/#/invite/" + encoded);
                         },
                         textColor: Colors.black54,
                         color: Colors.white54,
@@ -680,7 +681,7 @@ class _BoardState extends State<Board> {
                 },
               ),
               FlatButton(
-                child: new Text("Sumbit"),
+                child: new Text("Submit"),
                 onPressed: () {
                   if(_changeTextController.text.isNotEmpty)
                   changeBoardName(window.localStorage['token'], _changeTextController.text, boardId)

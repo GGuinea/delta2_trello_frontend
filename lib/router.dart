@@ -45,14 +45,11 @@ class Routes {
       }),
     );
     router.define(
-      '/invite/:username/:boardName',
+      '/invite/:credentials',
       transitionType: fluro.TransitionType.materialFullScreenDialog,
       handler: fluro.Handler(handlerFunc: (_, params) {
-        if (window.localStorage['token'] == null) return LogoutUserPage();
-        String username = params["username"]?.first;
-        String boardName = params["boardName"]?.first;
-        boardName = boardName.replaceAll("%20", " ");
-        return InvitePage(username: username, boardName: boardName);
+        String credentials = params["credentials"]?.first;
+        return InvitePage(credentials: credentials);
       }),
     );
     router.define(

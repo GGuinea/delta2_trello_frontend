@@ -11,25 +11,34 @@ TextEditingController passwordController = new TextEditingController();
 TextEditingController usernameController = new TextEditingController();
 
 class InvitePage extends StatefulWidget {
-  final String username;
-  final String boardName;
+  final String credentials;
 
-  const InvitePage({Key key, this.username, this.boardName}) : super(key: key);
+  const InvitePage({Key key, this.credentials}) : super(key: key);
 
   @override
-  _InvitePageState createState() => _InvitePageState(username,boardName);
+  _InvitePageState createState() => _InvitePageState(credentials);
 }
+
 class _InvitePageState extends State<InvitePage> {
-  final String username;
-  final String boardName;
+  final String credentials;
+  String username;
+  String boardName;
+  int boardId;
   final _formKey = GlobalKey<FormState>();
   String _error;
 
-  _InvitePageState(this.username, this.boardName);
+  _InvitePageState(this.credentials);
+
+  @override
+  void initState() {
+    List<String> decoded = utf8.decode(base64.decode(credentials)).split("/#/");
+    username = decoded[0];
+    boardName = decoded[1];
+    boardId = int.parse(decoded[2]);
+  }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Form(
       key: _formKey,
       child: Scaffold(
@@ -48,27 +57,25 @@ class _InvitePageState extends State<InvitePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: RichText(
-                    text:  new TextSpan(
-                      style: new TextStyle(
-                        fontSize: 25,
-                        color: Colors.black
+                    padding: const EdgeInsets.all(8.0),
+                    child: RichText(
+                      text: new TextSpan(
+                        style: new TextStyle(fontSize: 25, color: Colors.black),
+                        children: <TextSpan>[
+                          new TextSpan(
+                              text: username, style: new TextStyle(fontWeight: FontWeight.bold)),
+                          new TextSpan(text: " invite you to "),
+                          new TextSpan(
+                              text: boardName, style: new TextStyle(fontWeight: FontWeight.bold)),
+                        ],
                       ),
-                      children: <TextSpan>[
-                        new TextSpan(text: username, style: new TextStyle(fontWeight: FontWeight.bold) ),
-                        new TextSpan(text: " invite you to "),
-                        new TextSpan(text: boardName, style: new TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  )
-                ),
+                    )),
                 Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      )),
+                    Radius.circular(10),
+                  )),
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 200),
                     height: 400,
@@ -127,9 +134,9 @@ class _InvitePageState extends State<InvitePage> {
                             _error == null
                                 ? Container()
                                 : Text(
-                              _error,
-                              style: TextStyle(color: Colors.red, fontSize: 16),
-                            ),
+                                    _error,
+                                    style: TextStyle(color: Colors.red, fontSize: 16),
+                                  ),
                             SizedBox(
                               height: 32,
                             ),
@@ -140,10 +147,17 @@ class _InvitePageState extends State<InvitePage> {
                                   final String password = passwordController.text;
                                   login(username, password).then((response) {
                                     if (response.statusCode == 200) {
+                                      print(response.body);
                                       window.localStorage['token'] = jsonDecode(response.body)['token'];
-                                      Navigator.pushNamed(context, '/boards');
-                                      passwordController.clear();
-                                      usernameController.clear();
+                                      window.localStorage['username'] = username;
+                                      addMemberById(window.localStorage['token'], boardId, jsonDecode(response.body)['userId'])
+                                          .then((response) {
+                                        if (response.statusCode == 200) {
+                                          Navigator.pushNamed(context, "/boards/" + username);
+                                          passwordController.clear();
+                                          usernameController.clear();
+                                        }
+                                      });
                                     } else {
                                       setState(() {
                                         _error = json.decode(response.body)['error'];

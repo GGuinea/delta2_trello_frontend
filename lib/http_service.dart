@@ -59,6 +59,12 @@ Future<http.Response> addMember(String token, int boardId, String email) async {
       body: {"email": email});
   return response;
 }
+Future<http.Response> addMemberById(String token, int boardId, int idUser) async {
+  http.Response response = await http.patch('$url' + "/api/v1/board/member/" + '$boardId' + "/" +idUser.toString(),
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+
 Future<http.Response> deleteMember(String token, int boardId, int userId) async {
   http.Response response = await http.delete('$url' + "/api/v1/board/member/" + '$boardId' + "/" + '$userId',
       headers: {"Authorization": "Bearer " + token});
