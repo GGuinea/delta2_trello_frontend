@@ -5,8 +5,9 @@ import 'dart:html';
 import 'package:delta2_trello_frontend/http_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_list_drag_and_drop/drag_and_drop_list.dart';
 
-import 'constants.dart';
 
 class Board extends StatefulWidget {
   final String username;
@@ -18,21 +19,48 @@ class Board extends StatefulWidget {
   _BoardState createState() => _BoardState(username, boardId);
 }
 
+class InnerList {
+  String name;
+  List<String> children;
+
+  InnerList({this.name, this.children});
+}
+
 class _BoardState extends State<Board> {
-  final String username;
-  final int boardId;
-  List<String> lists = ["List one", "List two"];
-  List members = [];
+
   TextEditingController _listNameTextController = TextEditingController();
   TextEditingController _memberEmailTextController = TextEditingController();
   TextEditingController _descriptionController;
   TextEditingController _changeTextController;
-  Timer searchOnStoppedTyping;
+  TextEditingController _taskTextController = TextEditingController();
+  TextEditingController descriptionController;
+
+  final String username;
+  final int boardId;
   String _boardName;
   String _description;
+
+  bool _firstFetch = true;
+  List _members = [];
+  List<InnerList> _lists;
+
+  Timer searchOnStoppedTyping;
   bool viewVisible = false;
   double _menu = 0;
-  bool firstFetch = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchBoard();
+
+    _lists = List.generate(3, (outerIndex) {
+      return InnerList(
+        name: outerIndex.toString(),
+        children: List.generate(5, (innerIndex) => '$outerIndex.$innerIndex'),
+      );
+    });
+  }
 
   _BoardState(this.username, this.boardId);
 
@@ -41,8 +69,10 @@ class _BoardState extends State<Board> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    if (firstFetch) _fetchMembers();
+
+    if (_firstFetch) _fetchMembers();
     _descriptionController = new TextEditingController(text: _description);
+
 
     return Scaffold(
         appBar: AppBar(
@@ -102,7 +132,7 @@ class _BoardState extends State<Board> {
                         child: ListView.builder(
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
-                          itemCount: members.length,
+                          itemCount: _members.length,
                           itemBuilder: (context, index) {
                             return Container(
                                 margin: EdgeInsets.all(8.0),
@@ -116,7 +146,7 @@ class _BoardState extends State<Board> {
                                     child: Row(
                                       children: [
                                         Text(
-                                          members[index]['username'],
+                                          _members[index]['username'],
                                           style: TextStyle(
                                             fontSize: 14.0,
                                             fontWeight: FontWeight.bold,
@@ -124,7 +154,7 @@ class _BoardState extends State<Board> {
                                         ),
                                         FlatButton(
                                           onPressed: () {
-                                            _deleteMember(members[index]['id']);
+                                            _deleteMember(_members[index]['id']);
                                           },
                                           child: Icon(
                                             Icons.delete,
@@ -152,7 +182,6 @@ class _BoardState extends State<Board> {
                         ),
                       ),
                     ),
-                    //Spacer(),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: RaisedButton(
@@ -206,12 +235,12 @@ class _BoardState extends State<Board> {
                   width: size.width - _menu,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: lists.length + 1,
+                    itemCount: _lists.length + 1,
                     itemBuilder: (context, index) {
-                      if (index == lists.length)
+                      if (index == _lists.length)
                         return _buildAddListButton(context);
                       else
-                        return _buildLists(context, index);
+                        return _buildList(context, index);
                     },
                   ),
                 ),
@@ -222,11 +251,6 @@ class _BoardState extends State<Board> {
         ));
   }
 
-  @override
-  initState() {
-    super.initState();
-    fetchBoard();
-  }
 
   fetchBoard() {
     getDetailsBoard(window.localStorage['token'], boardId).then((response) => {
@@ -241,35 +265,68 @@ class _BoardState extends State<Board> {
     });
   }
 
-  Widget _buildLists(BuildContext context, int index) {
-    return Container(
-      width: 300.0,
-      decoration: BoxDecoration(
-        boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
-        borderRadius: BorderRadius.circular(10.0),
-        color: Colors.white,
-      ),
-      margin: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: InkWell(
-              child: Text(
-                lists[index],
+
+  Widget _buildList(BuildContext context, int index) {
+    return Stack(children: [
+      Container(
+        width: 300.0,
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: BoxDecoration(
+          boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
+          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.white,
+        ),
+        margin: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+         InkWell(
+           child: Text(
+                _lists[index].name,
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               onTap: () {
-                _showChangeNameListTextDialog(lists[index], index);
+                _showChangeNameListTextDialog(_lists[index].name, index);
               },
             ),
-          ),
-        ],
+            Container(
+              height: MediaQuery.of(context).size.height * 0.65,
+              child: DragAndDropList<String>(
+                _lists[index].children,
+                itemBuilder: (BuildContext context, item) {
+                  return _buildTask(
+                      index, _lists[index].children.indexOf(item));
+                },
+                onDragFinish: (oldIndex, newIndex) {
+                  _onTaskReorder(oldIndex, newIndex, index);
+                },
+              ),
+            ),
+            _buildAddTaskWidget(context, index)
+          ],
+        ),
       ),
-    );
+      Positioned.fill(
+        child: DragTarget<dynamic>(
+          onAccept: (data) {
+            if (data['from'] == index) {
+              return;
+            }
+
+            setState(() {
+              _lists[data['from']].children.remove(data['string']);
+              _lists[index].children.add(data['string']);
+            });
+          },
+          builder: (context, accept, reject) {
+            return Container();
+          },
+        ),
+      ),
+    ]);
   }
 
   SizedBox _buildMenu(context) {
@@ -461,9 +518,14 @@ class _BoardState extends State<Board> {
   }
 
   _addList(String listName) {
-    lists.add(listName);
-    _listNameTextController.clear();
-    setState(() {});
+    setState(() {
+      InnerList innerList = new InnerList(
+        name: listName,
+        children: List<String>(),
+      );
+      _lists.add(innerList);
+      _listNameTextController.clear();
+    });
   }
 
   _showDialog() {
@@ -559,13 +621,14 @@ class _BoardState extends State<Board> {
     getMembers(window.localStorage['token'], boardId).then((response) => {
           if (response.statusCode == 200)
             {
-              members.clear(),
-              members.addAll(jsonDecode(response.body)),
-              firstFetch = false,
+              _members.clear(),
+              _members.addAll(jsonDecode(response.body)),
+              _firstFetch = false,
               setState(() {})
             }
         });
   }
+
 
   _showChangeNameListTextDialog(String text, int index) {
     TextEditingController _changeTextController = TextEditingController(text: text);
@@ -585,10 +648,10 @@ class _BoardState extends State<Board> {
                 },
               ),
               FlatButton(
-                child: new Text("Sumbit"),
+                child: new Text("Submit"),
                 onPressed: () {
                   setState(() {
-                    lists[index] = _changeTextController.text;
+                    _lists[index].name = _changeTextController.text;
                     print(_changeTextController.text + '  ' + index.toString());
                     Navigator.of(context).pop();
                   });
@@ -654,5 +717,147 @@ class _BoardState extends State<Board> {
             ],
           );
         });
+  }
+
+  _onTaskReorder(int oldIndexTask, int newIndexTask, int listIndex) {
+    setState(() {
+      var oldValue = _lists[listIndex].children[oldIndexTask];
+      _lists[listIndex].children[oldIndexTask] = _lists[listIndex].children[newIndexTask];
+      _lists[listIndex].children[newIndexTask] = oldValue;
+    });
+  }
+
+  Widget _buildAddTaskWidget(context, index) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
+        borderRadius: BorderRadius.circular(10.0),
+        color: Colors.blue,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            _showAddTaskDialog(index);
+          },
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.add,
+              ),
+              SizedBox(
+                width: 16.0,
+              ),
+              Text("Add task"),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _showAddTaskDialog(int index) {
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return Dialog(
+            child: SizedBox(
+                width: 500,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
+                        child: TextField(
+                          decoration: InputDecoration(hintText: "Task message"),
+                          controller: _taskTextController,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                          child: RaisedButton(
+                            onPressed: () {
+                              if (_taskTextController.text.trim() != "") {
+                                _addTask(index, _taskTextController.text.trim());
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Text("Add task"),
+                          ),
+                        ))
+                  ],
+                )),
+          );
+        });
+  }
+
+  _addTask(int index, String text) {
+    setState(() {
+      _lists[index].children.add(text);
+      _taskTextController.text = "";
+    });
+  }
+
+  Container _buildTask(int index, int innerIndex) {
+    return Container(
+      width: 300.0,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Draggable<dynamic>(
+        feedback: Material(
+          elevation: 5.0,
+          child: Container(
+            width: 300.0,
+            padding: const EdgeInsets.all(16.0),
+            child: Text(_lists[index].children[innerIndex]),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(blurRadius: 3, color: Colors.grey)
+              ],
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.white,
+            ),
+          ),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Text(_lists[index].children[innerIndex]),
+              Spacer(),
+              FlatButton(
+                onPressed: () {
+                  _deleteTask(index, innerIndex);
+                },
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.black,
+                  size: 20,
+                ),
+              )
+            ],
+          ),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(blurRadius: 3, color: Colors.grey)
+            ],
+            borderRadius: BorderRadius.circular(10.0),
+            color: Colors.white,
+          ),
+        ),
+        data: {"from": index, "string": _lists[index].children[innerIndex]},
+      ),
+    );
+  }
+
+  _deleteTask(int listIndex, int taskIndex){
+    setState(() {
+      _lists[listIndex].children.removeAt(taskIndex);
+    });
   }
 }
