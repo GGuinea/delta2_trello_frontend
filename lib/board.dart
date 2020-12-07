@@ -858,7 +858,6 @@ class _BoardState extends State<Board> {
   _deleteTask(int listIndex, int taskIndex){
     setState(() {
       _lists[listIndex].children.removeAt(taskIndex);
-      print(_lists[listIndex].children);
     });
   }
 }
