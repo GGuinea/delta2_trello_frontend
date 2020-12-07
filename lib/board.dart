@@ -53,6 +53,19 @@ class _BoardState extends State<Board> {
             height: 32,
           ),
           automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.logout,
+              ),
+              onPressed: () {
+                window.localStorage.remove('token');
+                Navigator.pushNamed(context, "/");
+              },
+              iconSize: 32,
+              tooltip: "Logout",
+            )
+          ],
         ),
         body: Column(
           children: [

@@ -4,7 +4,6 @@ import 'dart:html';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'constants.dart';
 import 'http_service.dart';
 
 class Boards extends StatefulWidget {
@@ -40,6 +39,18 @@ class _BoardsState extends State<Boards> {
               _showAddBoardDialog();
             },
             iconSize: 32,
+            tooltip: "Add board"
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.logout,
+            ),
+            onPressed: () {
+              window.localStorage.remove('token');
+              Navigator.pushNamed(context, "/");
+            },
+            iconSize: 32,
+            tooltip: "Logout",
           )
         ],
       ),
