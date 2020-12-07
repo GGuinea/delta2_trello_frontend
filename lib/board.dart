@@ -60,6 +60,7 @@ class _BoardState extends State<Board> {
               ),
               onPressed: () {
                 window.localStorage.remove('token');
+                window.localStorage.remove('username');
                 Navigator.pushNamed(context, "/");
               },
               iconSize: 32,

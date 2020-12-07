@@ -18,7 +18,11 @@ class Routes {
     });
     router.define(
       '/',
-      handler: fluro.Handler(handlerFunc: (_, params) => HomePage()),
+      handler: fluro.Handler(handlerFunc: (_, params) {
+        if (window.localStorage['token'] != null && window.localStorage['username'] != null)
+          return Boards(username: window.localStorage['username']);
+        return HomePage();
+      }),
     );
     router.define(
       '/boards/:username',

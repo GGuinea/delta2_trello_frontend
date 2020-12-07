@@ -51,6 +51,7 @@ class _LogInState extends State<LogIn> {
               login(googleUser.displayName, googleUser.id).then((response) {
                 if (response.statusCode == 200) {
                   window.localStorage['token'] = jsonDecode(response.body)['token'];
+                  window.localStorage['username'] = googleUser.displayName;
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return Boards(username: googleUser.displayName);
                   }));
@@ -172,6 +173,7 @@ class _LogInState extends State<LogIn> {
                               login(username, password).then((response) {
                                 if (response.statusCode == 200) {
                                   window.localStorage['token'] = jsonDecode(response.body)['token'];
+                                  window.localStorage['username'] = username;
                                   Navigator.pushNamed(context, "/boards/" + username);
                                   passwordController.clear();
                                   usernameController.clear();
