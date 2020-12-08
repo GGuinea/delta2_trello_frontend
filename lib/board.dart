@@ -658,11 +658,15 @@ class _BoardState extends State<Board> {
               FlatButton(
                 child: new Text("Submit"),
                 onPressed: () {
-                  setState(() {
-                    _lists[index].name = _changeTextController.text;
-                    print(_changeTextController.text + '  ' + index.toString());
-                    Navigator.of(context).pop();
-                  });
+                  if(_changeTextController.text.isNotEmpty)
+                    updateColumn(window.localStorage['token'], _changeTextController.text, _lists[index].id)
+                        .then((response) => {
+                      if(response.statusCode == 202)
+                        setState(() {
+                          _lists[index].name = _changeTextController.text;
+                          Navigator.of(context).pop();
+                        })
+                    });
                 },
               ),
             ],

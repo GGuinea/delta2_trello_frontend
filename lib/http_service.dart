@@ -34,6 +34,12 @@ Future<http.Response> changeBoardDescription(String token, String description, i
   return response;
 }
 
+Future<http.Response> updateColumn(String token, String name, int id) async {
+  http.Response response = await http.patch('$url' + "/api/v1/column/" + '$id',
+      headers: {"Authorization": "Bearer " + token}, body: {"name": name});
+  return response;
+}
+
 Future<http.Response> deleteBoard(String token, int id) async {
   http.Response response = await http
       .delete('$url' + "/api/v1/board/" + '$id', headers: {"Authorization": "Bearer " + token});
