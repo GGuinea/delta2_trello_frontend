@@ -847,14 +847,30 @@ class _BoardState extends State<Board> {
             children: [
               Text(_lists[index].tasks[innerIndex].description),
               Spacer(),
-              FlatButton(
-                onPressed: () {
-                  _deleteTask(index, innerIndex);
-                },
-                child: Icon(
-                  Icons.delete,
-                  color: Colors.black,
-                  size: 20,
+              Container(
+                width: 25,
+                child: TextButton(
+                  onPressed: () {
+                    _showEditTaskDialog(index, innerIndex);
+                  },
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                ),
+              ),
+              Container(
+                width: 25,
+                child: TextButton(
+                  onPressed: () {
+                    _deleteTask(index, innerIndex);
+                  },
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.black,
+                    size: 20,
+                  ),
                 ),
               )
             ],
@@ -905,6 +921,44 @@ class _BoardState extends State<Board> {
                 }
               })
             }
+        });
+  }
+
+  void _showEditTaskDialog(int index, int innerIndex) {
+    _changeTextController = new TextEditingController(text: _lists[index].tasks[innerIndex].description);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit task:'),
+            content: TextField(
+              controller: _changeTextController,
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _changeTextController.clear();
+                },
+              ),
+              FlatButton(
+                child: new Text("Submit"),
+                onPressed: () {
+                  if(_changeTextController.text.isNotEmpty)
+                    updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id, _changeTextController.text, "null")
+                        .then((response) => {
+                      if(response.statusCode == 202)
+                        setState(() {
+                          _lists[index].tasks[innerIndex].description = _changeTextController.text;
+                          Navigator.of(context).pop();
+                          _changeTextController.clear();
+                        })
+                    });
+                },
+              ),
+            ],
+          );
         });
   }
 }
