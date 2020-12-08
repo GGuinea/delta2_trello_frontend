@@ -76,3 +76,29 @@ Future<http.Response> getMembers(String token, int boardId) async {
       headers: {"Authorization": "Bearer " + token});
   return response;
 }
+
+Future<http.Response> addColumn(String token, int boardId, String name) async {
+  http.Response response = await http.post('$url' + "/api/v1/" + '$boardId' + "/column",
+      headers: {"Authorization": "Bearer " + token},
+      body: {'name': name});
+  return response;
+}
+
+Future<http.Response> getLists(String token, int boardId) async {
+  http.Response response = await http.get('$url' + "/api/v1/" + '$boardId' + "/columns",
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+
+Future<http.Response> addTask(String token, int columnId, String text) async {
+  http.Response response = await http.post('$url' + "/api/v1/" + '$columnId' + "/card",
+      headers: {"Authorization": "Bearer " + token},
+      body: {'description': text});
+  return response;
+}
+
+Future<http.Response> deleteTask(String token, int taskId) async {
+  http.Response response = await http.delete('$url' + "/api/v1/card/" + '$taskId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}

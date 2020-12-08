@@ -19,11 +19,19 @@ class Board extends StatefulWidget {
   _BoardState createState() => _BoardState(username, boardId);
 }
 
-class InnerList {
-  String name;
-  List<String> children;
+class Task{
+  int id;
+  String description;
 
-  InnerList({this.name, this.children});
+  Task({this.id, this.description});
+}
+
+class InnerList {
+  int id;
+  String name;
+  List<Task> tasks;
+
+  InnerList({this.id, this.name, this.tasks});
 }
 
 class _BoardState extends State<Board> {
@@ -37,12 +45,12 @@ class _BoardState extends State<Board> {
 
   final String username;
   final int boardId;
-  String _boardName;
-  String _description;
+  String _boardName = "";
+  String _description = "";
 
   bool _firstFetch = true;
   List _members = [];
-  List<InnerList> _lists;
+  List<InnerList> _lists = [];
 
   Timer searchOnStoppedTyping;
   bool viewVisible = false;
@@ -53,13 +61,7 @@ class _BoardState extends State<Board> {
     super.initState();
 
     fetchBoard();
-
-    _lists = List.generate(3, (outerIndex) {
-      return InnerList(
-        name: outerIndex.toString(),
-        children: List.generate(5, (innerIndex) => '$outerIndex.$innerIndex'),
-      );
-    });
+    fetchLists();
   }
 
   _BoardState(this.username, this.boardId);
@@ -295,11 +297,11 @@ class _BoardState extends State<Board> {
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.65,
-              child: DragAndDropList<String>(
-                _lists[index].children,
+              child: DragAndDropList<Task>(
+                _lists[index].tasks,
                 itemBuilder: (BuildContext context, item) {
                   return _buildTask(
-                      index, _lists[index].children.indexOf(item));
+                      index, _lists[index].tasks.indexOf(item));
                 },
                 onDragFinish: (oldIndex, newIndex) {
                   _onTaskReorder(oldIndex, newIndex, index);
@@ -318,8 +320,8 @@ class _BoardState extends State<Board> {
             }
 
             setState(() {
-              _lists[data['from']].children.remove(data['string']);
-              _lists[index].children.add(data['string']);
+              _lists[data['from']].tasks.remove(data['string']);
+              _lists[index].tasks.add(data['string']);
             });
           },
           builder: (context, accept, reject) {
@@ -519,14 +521,19 @@ class _BoardState extends State<Board> {
   }
 
   _addList(String listName) {
-    setState(() {
-      InnerList innerList = new InnerList(
-        name: listName,
-        children: List<String>(),
-      );
-      _lists.add(innerList);
-      _listNameTextController.clear();
-    });
+    addColumn(window.localStorage['token'], boardId, listName).then((response) => {
+          if (response.statusCode == 201)
+            {
+              setState(() {
+                InnerList innerList = new InnerList(
+                  name: listName,
+                  tasks: List<Task>(),
+                );
+                _lists.add(innerList);
+                _listNameTextController.clear();
+              })
+            }
+        });
   }
 
   _showDialog() {
@@ -722,9 +729,9 @@ class _BoardState extends State<Board> {
 
   _onTaskReorder(int oldIndexTask, int newIndexTask, int listIndex) {
     setState(() {
-      var oldValue = _lists[listIndex].children[oldIndexTask];
-      _lists[listIndex].children[oldIndexTask] = _lists[listIndex].children[newIndexTask];
-      _lists[listIndex].children[newIndexTask] = oldValue;
+      var oldValue = _lists[listIndex].tasks[oldIndexTask];
+      _lists[listIndex].tasks[oldIndexTask] = _lists[listIndex].tasks[newIndexTask];
+      _lists[listIndex].tasks[newIndexTask] = oldValue;
     });
   }
 
@@ -799,10 +806,19 @@ class _BoardState extends State<Board> {
   }
 
   _addTask(int index, String text) {
-    setState(() {
-      _lists[index].children.add(text);
-      _taskTextController.text = "";
-    });
+    addTask(window.localStorage['token'], _lists[index].id, text)
+        .then((response) => {
+              if (response.statusCode == 201)
+                {
+                  setState(() {
+                    Task task = new Task(
+                        id: jsonDecode(response.body)['id'],
+                        description: jsonDecode(response.body)['description']);
+                    _lists[index].tasks.add(task);
+                    _taskTextController.text = "";
+                  })
+                }
+            });
   }
 
   Container _buildTask(int index, int innerIndex) {
@@ -815,7 +831,7 @@ class _BoardState extends State<Board> {
           child: Container(
             width: 300.0,
             padding: const EdgeInsets.all(16.0),
-            child: Text(_lists[index].children[innerIndex]),
+            child: Text(_lists[index].tasks[innerIndex].description),
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(blurRadius: 3, color: Colors.grey)
@@ -829,7 +845,7 @@ class _BoardState extends State<Board> {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              Text(_lists[index].children[innerIndex]),
+              Text(_lists[index].tasks[innerIndex].description),
               Spacer(),
               FlatButton(
                 onPressed: () {
@@ -851,14 +867,44 @@ class _BoardState extends State<Board> {
             color: Colors.white,
           ),
         ),
-        data: {"from": index, "string": _lists[index].children[innerIndex]},
+        data: {"from": index, "string": _lists[index].tasks[innerIndex]},
       ),
     );
   }
 
-  _deleteTask(int listIndex, int taskIndex){
-    setState(() {
-      _lists[listIndex].children.removeAt(taskIndex);
-    });
+  _deleteTask(int listIndex, int taskIndex) {
+    deleteTask(
+            window.localStorage['token'], _lists[listIndex].tasks[taskIndex].id)
+        .then((response) => {
+              if (response.statusCode == 200)
+                {
+                  setState(() {
+                    _lists[listIndex].tasks.removeAt(taskIndex);
+                  })
+                }
+            });
+  }
+
+  fetchLists() {
+    getLists(window.localStorage['token'], boardId).then((response) => {
+          if (response.statusCode == 200)
+            {
+              setState(() {
+                for (var listFromDatabase in jsonDecode(response.body)) {
+                  InnerList innerList = new InnerList(
+                      id: listFromDatabase['id'],
+                      name: listFromDatabase['name'],
+                      tasks: List<Task>());
+
+                  for (var taskFromDatabase in listFromDatabase['cards']) {
+                    innerList.tasks.add(new Task(
+                        id: taskFromDatabase['id'],
+                        description: taskFromDatabase['description']));
+                  }
+                  _lists.add(innerList);
+                }
+              })
+            }
+        });
   }
 }
