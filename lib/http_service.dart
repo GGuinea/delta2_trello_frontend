@@ -110,10 +110,10 @@ Future<http.Response> deleteTask(String token, int taskId) async {
 }
 
 Future<http.Response> updateTask(
-    String token, int taskId, String description, String deadline) async {
+    String token, int taskId, String description, String deadline, int columnId) async {
   http.Response response = await http.patch(
       '$url' + "/api/v1/card/" + '$taskId',
       headers: {"Authorization": "Bearer " + token},
-      body: {'description': description, 'deadline': deadline});
+      body: {'description': description, 'deadline': deadline, 'column_id':columnId.toString()});
   return response;
 }

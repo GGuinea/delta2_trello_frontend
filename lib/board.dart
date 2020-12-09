@@ -319,10 +319,19 @@ class _BoardState extends State<Board> {
               return;
             }
 
-            setState(() {
-              _lists[data['from']].tasks.remove(data['string']);
-              _lists[index].tasks.add(data['string']);
-            });
+            Task task = data['task'];
+
+            updateTask(window.localStorage['token'], task.id, task.description,
+                    "null", _lists[index].id)
+                .then((response) => {
+                      if (response.statusCode == 202)
+                        {
+                          setState(() {
+                            _lists[data['from']].tasks.remove(data['task']);
+                            _lists[index].tasks.add(data['task']);
+                          })
+                        }
+                    });
           },
           builder: (context, accept, reject) {
             return Container();
@@ -887,7 +896,7 @@ class _BoardState extends State<Board> {
             color: Colors.white,
           ),
         ),
-        data: {"from": index, "string": _lists[index].tasks[innerIndex]},
+        data: {"from": index, "task": _lists[index].tasks[innerIndex]},
       ),
     );
   }
@@ -950,7 +959,7 @@ class _BoardState extends State<Board> {
                 child: new Text("Submit"),
                 onPressed: () {
                   if(_changeTextController.text.isNotEmpty)
-                    updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id, _changeTextController.text, "null")
+                    updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id, _changeTextController.text, "null", _lists[index].id)
                         .then((response) => {
                       if(response.statusCode == 202)
                         setState(() {
