@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_list_drag_and_drop/drag_and_drop_list.dart';
 
-
 class Board extends StatefulWidget {
   final String username;
   final int boardId;
@@ -19,11 +18,12 @@ class Board extends StatefulWidget {
   _BoardState createState() => _BoardState(username, boardId);
 }
 
-class Task{
+class Task {
   int id;
   String description;
+  String deadline;
 
-  Task({this.id, this.description});
+  Task({this.id, this.description, this.deadline});
 }
 
 class InnerList {
@@ -35,7 +35,6 @@ class InnerList {
 }
 
 class _BoardState extends State<Board> {
-
   TextEditingController _listNameTextController = TextEditingController();
   TextEditingController _memberEmailTextController = TextEditingController();
   TextEditingController _descriptionController;
@@ -66,15 +65,12 @@ class _BoardState extends State<Board> {
 
   _BoardState(this.username, this.boardId);
 
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-
     if (_firstFetch) _fetchMembers();
     _descriptionController = new TextEditingController(text: _description);
-
 
     return Scaffold(
         appBar: AppBar(
@@ -254,20 +250,19 @@ class _BoardState extends State<Board> {
         ));
   }
 
-
   fetchBoard() {
     getDetailsBoard(window.localStorage['token'], boardId).then((response) => {
-      if(response.statusCode == 200){
-        setState(() {
-          _description = jsonDecode(response.body)['description'];
-          _boardName = jsonDecode(response.body)['name'];
-        }),
-      }else{
-        Navigator.pushNamed(context, '/404')
-      }
-    });
+          if (response.statusCode == 200)
+            {
+              setState(() {
+                _description = jsonDecode(response.body)['description'];
+                _boardName = jsonDecode(response.body)['name'];
+              }),
+            }
+          else
+            {Navigator.pushNamed(context, '/404')}
+        });
   }
-
 
   Widget _buildList(BuildContext context, int index) {
     return Stack(children: [
@@ -283,8 +278,8 @@ class _BoardState extends State<Board> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-         InkWell(
-           child: Text(
+            InkWell(
+              child: Text(
                 _lists[index].name,
                 style: TextStyle(
                   fontSize: 16.0,
@@ -300,8 +295,7 @@ class _BoardState extends State<Board> {
               child: DragAndDropList<Task>(
                 _lists[index].tasks,
                 itemBuilder: (BuildContext context, item) {
-                  return _buildTask(
-                      index, _lists[index].tasks.indexOf(item));
+                  return _buildTask(index, _lists[index].tasks.indexOf(item));
                 },
                 onDragFinish: (oldIndex, newIndex) {
                   _onTaskReorder(oldIndex, newIndex, index);
@@ -322,7 +316,7 @@ class _BoardState extends State<Board> {
             Task task = data['task'];
 
             updateTask(window.localStorage['token'], task.id, task.description,
-                    "null", _lists[index].id)
+                    task.deadline.toString(), _lists[index].id)
                 .then((response) => {
                       if (response.statusCode == 202)
                         {
@@ -406,11 +400,12 @@ class _BoardState extends State<Board> {
                             child: new Text("Save"),
                             color: Colors.lightGreenAccent,
                             onPressed: () {
-                              changeBoardDescription(window.localStorage['token'], _descriptionController.text, boardId)
+                              changeBoardDescription(window.localStorage['token'],
+                                      _descriptionController.text, boardId)
                                   .then((response) => {
-                                    if (response.statusCode == 202) {
-                                      print("Description changed")
-                                    }});
+                                        if (response.statusCode == 202)
+                                          {print("Description changed")}
+                                      });
                             },
                           ),
                         ),
@@ -556,7 +551,8 @@ class _BoardState extends State<Board> {
               child: new Text("Yes"),
               onPressed: () {
                 deleteBoard(window.localStorage['token'], boardId).then((response) => {
-                      if (response.statusCode == 200) {Navigator.pushNamed(context, '/boards/'+username)}
+                      if (response.statusCode == 200)
+                        {Navigator.pushNamed(context, '/boards/' + username)}
                     });
               },
             ),
@@ -646,7 +642,6 @@ class _BoardState extends State<Board> {
         });
   }
 
-
   _showChangeNameListTextDialog(String text, int index) {
     TextEditingController _changeTextController = TextEditingController(text: text);
     showDialog(
@@ -667,15 +662,15 @@ class _BoardState extends State<Board> {
               FlatButton(
                 child: new Text("Submit"),
                 onPressed: () {
-                  if(_changeTextController.text.isNotEmpty)
+                  if (_changeTextController.text.isNotEmpty)
                     updateColumn(window.localStorage['token'], _changeTextController.text, _lists[index].id)
                         .then((response) => {
-                      if(response.statusCode == 202)
-                        setState(() {
-                          _lists[index].name = _changeTextController.text;
-                          Navigator.of(context).pop();
-                        })
-                    });
+                              if (response.statusCode == 202)
+                                setState(() {
+                                  _lists[index].name = _changeTextController.text;
+                                  Navigator.of(context).pop();
+                                })
+                            });
                 },
               ),
             ],
@@ -703,21 +698,23 @@ class _BoardState extends State<Board> {
               FlatButton(
                 child: new Text("Submit"),
                 onPressed: () {
-                  if(_changeTextController.text.isNotEmpty)
-                  changeBoardName(window.localStorage['token'], _changeTextController.text, boardId)
-                      .then((response) => {
-                        if(response.statusCode == 202)
-                            setState(() {
-                              _boardName = _changeTextController.text;
-                              Navigator.of(context).pop();
-                            })
-                          });
+                  if (_changeTextController.text.isNotEmpty)
+                    changeBoardName(
+                            window.localStorage['token'], _changeTextController.text, boardId)
+                        .then((response) => {
+                              if (response.statusCode == 202)
+                                setState(() {
+                                  _boardName = _changeTextController.text;
+                                  Navigator.of(context).pop();
+                                })
+                            });
                 },
               ),
             ],
           );
         });
   }
+
   _showCreateLinkDialog(String link) {
     _changeTextController = new TextEditingController(text: link);
     showDialog(
@@ -819,19 +816,18 @@ class _BoardState extends State<Board> {
   }
 
   _addTask(int index, String text) {
-    addTask(window.localStorage['token'], _lists[index].id, text)
-        .then((response) => {
-              if (response.statusCode == 201)
-                {
-                  setState(() {
-                    Task task = new Task(
-                        id: jsonDecode(response.body)['id'],
-                        description: jsonDecode(response.body)['description']);
-                    _lists[index].tasks.add(task);
-                    _taskTextController.text = "";
-                  })
-                }
-            });
+    addTask(window.localStorage['token'], _lists[index].id, text).then((response) => {
+          if (response.statusCode == 201)
+            {
+              setState(() {
+                Task task = new Task(
+                    id: jsonDecode(response.body)['id'],
+                    description: jsonDecode(response.body)['description']);
+                _lists[index].tasks.add(task);
+                _taskTextController.text = "";
+              })
+            }
+        });
   }
 
   Container _buildTask(int index, int innerIndex) {
@@ -846,9 +842,7 @@ class _BoardState extends State<Board> {
             padding: const EdgeInsets.all(16.0),
             child: Text(_lists[index].tasks[innerIndex].description),
             decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(blurRadius: 3, color: Colors.grey)
-              ],
+              boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
               borderRadius: BorderRadius.circular(10.0),
               color: Colors.white,
             ),
@@ -856,42 +850,58 @@ class _BoardState extends State<Board> {
         ),
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
+          child: Column(
             children: [
-              Text(_lists[index].tasks[innerIndex].description),
-              Spacer(),
-              Container(
-                width: 25,
-                child: TextButton(
-                  onPressed: () {
-                    _showEditTaskDialog(index, innerIndex);
-                  },
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.black,
-                    size: 20,
+              Row(
+                children: [
+                  Text(_lists[index].tasks[innerIndex].description),
+                  Spacer(),
+                  Container(
+                    width: 25,
+                    child: TextButton(
+                      onPressed: () {
+                        _showEditTaskDialog(index, innerIndex);
+                      },
+                      child: Icon(
+                        Icons.edit,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
+                  Container(
+                    width: 25,
+                    child: TextButton(
+                      onPressed: () {
+                        _deleteTask(index, innerIndex);
+                      },
+                      child: Icon(
+                        Icons.delete,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                    ),
+                  )
+                ],
               ),
-              Container(
-                width: 25,
-                child: TextButton(
-                  onPressed: () {
-                    _deleteTask(index, innerIndex);
-                  },
-                  child: Icon(
-                    Icons.delete,
-                    color: Colors.black,
-                    size: 20,
-                  ),
-                ),
+              Row(
+                children: [
+                  if (_lists[index].tasks[innerIndex].deadline == null)
+                    Container()
+                  else
+                    Container(
+                        color: Colors.grey[100],
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Text(_lists[index].tasks[innerIndex].deadline.substring(0, 10) + " " +
+                              _lists[index].tasks[innerIndex].deadline.substring(11, 16)),
+                        )),
+                ],
               )
             ],
           ),
           decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(blurRadius: 3, color: Colors.grey)
-            ],
+            boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
             borderRadius: BorderRadius.circular(10.0),
             color: Colors.white,
           ),
@@ -902,8 +912,7 @@ class _BoardState extends State<Board> {
   }
 
   _deleteTask(int listIndex, int taskIndex) {
-    deleteTask(
-            window.localStorage['token'], _lists[listIndex].tasks[taskIndex].id)
+    deleteTask(window.localStorage['token'], _lists[listIndex].tasks[taskIndex].id)
         .then((response) => {
               if (response.statusCode == 200)
                 {
@@ -928,7 +937,8 @@ class _BoardState extends State<Board> {
                   for (var taskFromDatabase in listFromDatabase['cards']) {
                     innerList.tasks.add(new Task(
                         id: taskFromDatabase['id'],
-                        description: taskFromDatabase['description']));
+                        description: taskFromDatabase['description'],
+                        deadline: taskFromDatabase['deadline']));
                   }
                   _lists.add(innerList);
                 }
@@ -938,40 +948,192 @@ class _BoardState extends State<Board> {
   }
 
   void _showEditTaskDialog(int index, int innerIndex) {
-    _changeTextController = new TextEditingController(text: _lists[index].tasks[innerIndex].description);
+    _changeTextController =
+        new TextEditingController(text: _lists[index].tasks[innerIndex].description);
+    TextEditingController _changeDescriptionTextController =
+        new TextEditingController(text: "opis");
+    String deadline = _lists[index].tasks[innerIndex].deadline;
+    DateTime _dateTime;
+    String data = "Choose date";
+    String time = "Choose time";
+
+    if (deadline != null) {
+      _dateTime = DateTime.parse(deadline);
+      data = _dateTime.toString().substring(0, 10);
+      time = _dateTime.toString().substring(11, 16);
+    }
+    String error;
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Edit task:'),
-            content: TextField(
-              controller: _changeTextController,
-            ),
-            actions: <Widget>[
-              new FlatButton(
-                child: new Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _changeTextController.clear();
-                },
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit task:'),
+              content: Container(
+                height: 350,
+                child: Column(
+                  children: [
+                    Text(
+                      "Task name",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    TextField(
+                      controller: _changeTextController,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Task description",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    TextFormField(
+                      controller: _changeDescriptionTextController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                          border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.teal)),
+                          hintText: 'Enter details about card'),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Due Date",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Date",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            GestureDetector(
+                              child: Text(data),
+                              onTap: () {
+                                showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime(2100),
+                                ).then((value) {
+                                  setState(() {
+                                    if (value != null) {
+                                      data = value.toString().substring(0, 10);
+                                      _dateTime = new DateTime(value.year, value.month, value.day);
+                                      error = null;
+                                    } else {
+                                      data = "Choose date";
+                                      time = "Choose time";
+                                      _dateTime = null;
+                                    }
+                                  });
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "Time",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            GestureDetector(
+                              child: Text(time),
+                              onTap: () {
+                                showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                ).then((value) {
+                                  setState(() {
+                                    if (_dateTime == null) {
+                                      error = "First choose Date";
+                                    } else {
+                                      if (value != null) {
+                                        _dateTime = new DateTime(_dateTime.year, _dateTime.month,
+                                            _dateTime.day, value.hour, value.minute);
+                                        if (_dateTime.isBefore(DateTime.now())) {
+                                          error = "Wrong time";
+                                        } else {
+                                          time = value.toString().substring(10, 15);
+                                          error = null;
+                                        }
+                                      } else {
+                                        time = "Choose time";
+                                      }
+                                    }
+                                  });
+                                });
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    error == null
+                        ? Container()
+                        : Text(
+                            error,
+                            style: TextStyle(color: Colors.red, fontSize: 16),
+                          ),
+                  ],
+                ),
               ),
-              FlatButton(
-                child: new Text("Submit"),
-                onPressed: () {
-                  if(_changeTextController.text.isNotEmpty)
-                    updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id, _changeTextController.text, "null", _lists[index].id)
-                        .then((response) => {
-                      if(response.statusCode == 202)
-                        setState(() {
-                          _lists[index].tasks[innerIndex].description = _changeTextController.text;
-                          Navigator.of(context).pop();
-                          _changeTextController.clear();
-                        })
-                    });
-                },
-              ),
-            ],
-          );
+              actions: <Widget>[
+                new FlatButton(
+                  child: new Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _changeTextController.clear();
+                  },
+                ),
+                FlatButton(
+                  child: new Text("Submit"),
+                  onPressed: () {
+                    if (_changeTextController.text.isEmpty)
+                      setState(() {
+                        error = "Task must have name";
+                      });
+                    else
+                      setState(() {
+                        error = null;
+                      });
+
+                    if (data != "Choose date" && time == "Choose time")
+                      setState(() {
+                        error = "Choose time";
+                      });
+                    else if (error == null)
+                      updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id,
+                              _changeTextController.text, _dateTime.toString(), _lists[index].id)
+                          .then((response) => {
+                                if (response.statusCode == 202)
+                                  setState(() {
+                                    _lists[index].tasks[innerIndex].description =
+                                        _changeTextController.text;
+                                    _lists[index].tasks[innerIndex].deadline = _dateTime.toString();
+                                    if (_dateTime == null)
+                                      _lists[index].tasks[innerIndex].deadline = null;
+                                    Navigator.of(context).pop();
+                                    refreshView();
+                                    _changeTextController.clear();
+                                  })
+                              });
+                  },
+                ),
+              ],
+            );
+          });
         });
+  }
+  void refreshView(){
+    setState(() {});
   }
 }
