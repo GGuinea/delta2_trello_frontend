@@ -20,10 +20,11 @@ class Board extends StatefulWidget {
 
 class Task {
   int id;
-  String description;
+  String name;
   String deadline;
+  String description;
 
-  Task({this.id, this.description, this.deadline});
+  Task({this.id,this.name ,this.deadline,this.description});
 }
 
 class InnerList {
@@ -315,7 +316,7 @@ class _BoardState extends State<Board> {
 
             Task task = data['task'];
 
-            updateTask(window.localStorage['token'], task.id, task.description,
+            updateTask(window.localStorage['token'], task.id, task.name,task.description,
                     task.deadline.toString(), _lists[index].id)
                 .then((response) => {
                       if (response.statusCode == 202)
@@ -822,7 +823,7 @@ class _BoardState extends State<Board> {
               setState(() {
                 Task task = new Task(
                     id: jsonDecode(response.body)['id'],
-                    description: jsonDecode(response.body)['description']);
+                    name: jsonDecode(response.body)['name']);
                 _lists[index].tasks.add(task);
                 _taskTextController.text = "";
               })
@@ -840,7 +841,7 @@ class _BoardState extends State<Board> {
           child: Container(
             width: 300.0,
             padding: const EdgeInsets.all(16.0),
-            child: Text(_lists[index].tasks[innerIndex].description),
+            child: Text(_lists[index].tasks[innerIndex].name),
             decoration: BoxDecoration(
               boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
               borderRadius: BorderRadius.circular(10.0),
@@ -854,7 +855,7 @@ class _BoardState extends State<Board> {
             children: [
               Row(
                 children: [
-                  Text(_lists[index].tasks[innerIndex].description),
+                  Text(_lists[index].tasks[innerIndex].name),
                   Spacer(),
                   Container(
                     width: 25,
@@ -937,7 +938,7 @@ class _BoardState extends State<Board> {
                   for (var taskFromDatabase in listFromDatabase['cards']) {
                     innerList.tasks.add(new Task(
                         id: taskFromDatabase['id'],
-                        description: taskFromDatabase['description'],
+                        name: taskFromDatabase['name'],
                         deadline: taskFromDatabase['deadline']));
                   }
                   _lists.add(innerList);
@@ -949,14 +950,13 @@ class _BoardState extends State<Board> {
 
   void _showEditTaskDialog(int index, int innerIndex) {
     _changeTextController =
-        new TextEditingController(text: _lists[index].tasks[innerIndex].description);
+        new TextEditingController(text: _lists[index].tasks[innerIndex].name);
     TextEditingController _changeDescriptionTextController =
-        new TextEditingController(text: "opis");
+        new TextEditingController(text: _lists[index].tasks[innerIndex].description);
     String deadline = _lists[index].tasks[innerIndex].deadline;
     DateTime _dateTime;
     String data = "Choose date";
     String time = "Choose time";
-
     if (deadline != null) {
       _dateTime = DateTime.parse(deadline);
       data = _dateTime.toString().substring(0, 10);
@@ -1112,12 +1112,12 @@ class _BoardState extends State<Board> {
                       });
                     else if (error == null)
                       updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id,
-                              _changeTextController.text, _dateTime.toString(), _lists[index].id)
+                              _changeTextController.text,_changeDescriptionTextController.text, _dateTime.toString(), _lists[index].id)
                           .then((response) => {
                                 if (response.statusCode == 202)
                                   setState(() {
-                                    _lists[index].tasks[innerIndex].description =
-                                        _changeTextController.text;
+                                    _lists[index].tasks[innerIndex].name = _changeTextController.text;
+                                    _lists[index].tasks[innerIndex].description = _changeDescriptionTextController.text;
                                     _lists[index].tasks[innerIndex].deadline = _dateTime.toString();
                                     if (_dateTime == null)
                                       _lists[index].tasks[innerIndex].deadline = null;

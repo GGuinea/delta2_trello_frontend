@@ -99,7 +99,7 @@ Future<http.Response> getLists(String token, int boardId) async {
 Future<http.Response> addTask(String token, int columnId, String text) async {
   http.Response response = await http.post('$url' + "/api/v1/" + '$columnId' + "/card",
       headers: {"Authorization": "Bearer " + token},
-      body: {'description': text});
+      body: {'name': text});
   return response;
 }
 
@@ -110,10 +110,10 @@ Future<http.Response> deleteTask(String token, int taskId) async {
 }
 
 Future<http.Response> updateTask(
-    String token, int taskId, String description, String deadline, int columnId) async {
+    String token, int taskId, String name, String description, String deadline, int columnId) async {
   http.Response response = await http.patch(
       '$url' + "/api/v1/card/" + '$taskId',
       headers: {"Authorization": "Bearer " + token},
-      body: {'description': description, 'deadline': deadline, 'column_id':columnId.toString()});
+      body: {'name': name,'description': description, 'deadline': deadline, 'column_id':columnId.toString()});
   return response;
 }
