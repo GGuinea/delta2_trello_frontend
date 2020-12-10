@@ -531,7 +531,8 @@ class _BoardState extends State<Board> {
             {
               setState(() {
                 InnerList innerList = new InnerList(
-                  name: listName,
+                  id:jsonDecode(response.body)['id'],
+                  name: jsonDecode(response.body)['name'],
                   tasks: List<Task>(),
                 );
                 _lists.add(innerList);
