@@ -939,6 +939,7 @@ class _BoardState extends State<Board> {
                     innerList.tasks.add(new Task(
                         id: taskFromDatabase['id'],
                         name: taskFromDatabase['name'],
+                        description: taskFromDatabase['description'].toString(),
                         deadline: taskFromDatabase['deadline']));
                   }
                   _lists.add(innerList);
