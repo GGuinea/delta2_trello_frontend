@@ -96,10 +96,10 @@ Future<http.Response> getLists(String token, int boardId) async {
   return response;
 }
 
-Future<http.Response> addTask(String token, int columnId, String text) async {
+Future<http.Response> addTask(String token, int columnId, String name, String description) async {
   http.Response response = await http.post('$url' + "/api/v1/" + '$columnId' + "/card",
       headers: {"Authorization": "Bearer " + token},
-      body: {'name': text});
+      body: {'name': name, "description": description});
   return response;
 }
 

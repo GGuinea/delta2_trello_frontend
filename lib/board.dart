@@ -817,19 +817,21 @@ class _BoardState extends State<Board> {
         });
   }
 
-  _addTask(int index, String text) {
-    addTask(window.localStorage['token'], _lists[index].id, text).then((response) => {
-          if (response.statusCode == 201)
-            {
-              setState(() {
-                Task task = new Task(
-                    id: jsonDecode(response.body)['id'],
-                    name: jsonDecode(response.body)['name']);
-                _lists[index].tasks.add(task);
-                _taskTextController.text = "";
-              })
-            }
-        });
+  _addTask(int index, String name) {
+    addTask(window.localStorage['token'], _lists[index].id, name, "")
+        .then((response) => {
+              if (response.statusCode == 201)
+                {
+                  setState(() {
+                    Task task = new Task(
+                        id: jsonDecode(response.body)['id'],
+                        name: jsonDecode(response.body)['name'],
+                        description: jsonDecode(response.body)['description']);
+                    _lists[index].tasks.add(task);
+                    _taskTextController.text = "";
+                  })
+                }
+            });
   }
 
   Container _buildTask(int index, int innerIndex) {
