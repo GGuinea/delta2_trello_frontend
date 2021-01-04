@@ -18,21 +18,21 @@ class Board extends StatefulWidget {
   _BoardState createState() => _BoardState(username, boardId);
 }
 
-class Task {
+class Card {
   int id;
   String name;
   String deadline;
   String description;
 
-  Task({this.id,this.name ,this.deadline,this.description});
+  Card({this.id,this.name ,this.deadline,this.description});
 }
 
 class InnerList {
   int id;
   String name;
-  List<Task> tasks;
+  List<Card> cards;
 
-  InnerList({this.id, this.name, this.tasks});
+  InnerList({this.id, this.name, this.cards});
 }
 
 class _BoardState extends State<Board> {
@@ -40,7 +40,7 @@ class _BoardState extends State<Board> {
   TextEditingController _memberEmailTextController = TextEditingController();
   TextEditingController _descriptionController;
   TextEditingController _changeTextController;
-  TextEditingController _taskTextController = TextEditingController();
+  TextEditingController _cardTextController = TextEditingController();
   TextEditingController descriptionController;
 
   final String username;
@@ -293,17 +293,17 @@ class _BoardState extends State<Board> {
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.65,
-              child: DragAndDropList<Task>(
-                _lists[index].tasks,
+              child: DragAndDropList<Card>(
+                _lists[index].cards,
                 itemBuilder: (BuildContext context, item) {
-                  return _buildTask(index, _lists[index].tasks.indexOf(item));
+                  return _buildCard(index, _lists[index].cards.indexOf(item));
                 },
                 onDragFinish: (oldIndex, newIndex) {
-                  _onTaskReorder(oldIndex, newIndex, index);
+                  _onCardReorder(oldIndex, newIndex, index);
                 },
               ),
             ),
-            _buildAddTaskWidget(context, index)
+            _buildAddCardWidget(context, index)
           ],
         ),
       ),
@@ -314,16 +314,16 @@ class _BoardState extends State<Board> {
               return;
             }
 
-            Task task = data['task'];
+            Card card = data['card'];
 
-            updateTask(window.localStorage['token'], task.id, task.name,task.description,
-                    task.deadline.toString(), _lists[index].id)
+            updateCard(window.localStorage['token'], card.id, card.name,card.description,
+                    card.deadline.toString(), _lists[index].id)
                 .then((response) => {
                       if (response.statusCode == 202)
                         {
                           setState(() {
-                            _lists[data['from']].tasks.remove(data['task']);
-                            _lists[index].tasks.add(data['task']);
+                            _lists[data['from']].cards.remove(data['card']);
+                            _lists[index].cards.add(data['card']);
                           })
                         }
                     });
@@ -533,7 +533,7 @@ class _BoardState extends State<Board> {
                 InnerList innerList = new InnerList(
                   id:jsonDecode(response.body)['id'],
                   name: jsonDecode(response.body)['name'],
-                  tasks: List<Task>(),
+                  cards: List<Card>(),
                 );
                 _lists.add(innerList);
                 _listNameTextController.clear();
@@ -739,15 +739,15 @@ class _BoardState extends State<Board> {
         });
   }
 
-  _onTaskReorder(int oldIndexTask, int newIndexTask, int listIndex) {
+  _onCardReorder(int oldCardIndex, int newCardIndex, int listIndex) {
     setState(() {
-      var oldValue = _lists[listIndex].tasks[oldIndexTask];
-      _lists[listIndex].tasks[oldIndexTask] = _lists[listIndex].tasks[newIndexTask];
-      _lists[listIndex].tasks[newIndexTask] = oldValue;
+      var oldValue = _lists[listIndex].cards[oldCardIndex];
+      _lists[listIndex].cards[oldCardIndex] = _lists[listIndex].cards[newCardIndex];
+      _lists[listIndex].cards[newCardIndex] = oldValue;
     });
   }
 
-  Widget _buildAddTaskWidget(context, index) {
+  Widget _buildAddCardWidget(context, index) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
@@ -759,7 +759,7 @@ class _BoardState extends State<Board> {
         padding: const EdgeInsets.all(8.0),
         child: InkWell(
           onTap: () {
-            _showAddTaskDialog(index);
+            _showAddCardDialog(index);
           },
           child: Row(
             children: <Widget>[
@@ -769,7 +769,7 @@ class _BoardState extends State<Board> {
               SizedBox(
                 width: 16.0,
               ),
-              Text("Add task"),
+              Text("Add card"),
             ],
           ),
         ),
@@ -777,7 +777,7 @@ class _BoardState extends State<Board> {
     );
   }
 
-  _showAddTaskDialog(int index) {
+  _showAddCardDialog(int index) {
     showDialog(
         context: context,
         barrierDismissible: true,
@@ -792,8 +792,8 @@ class _BoardState extends State<Board> {
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
                         child: TextField(
-                          decoration: InputDecoration(hintText: "Task message"),
-                          controller: _taskTextController,
+                          decoration: InputDecoration(hintText: "Card message"),
+                          controller: _cardTextController,
                         ),
                       ),
                     ),
@@ -803,12 +803,12 @@ class _BoardState extends State<Board> {
                           padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
                           child: RaisedButton(
                             onPressed: () {
-                              if (_taskTextController.text.trim() != "") {
-                                _addTask(index, _taskTextController.text.trim());
+                              if (_cardTextController.text.trim() != "") {
+                                _addCard(index, _cardTextController.text.trim());
                                 Navigator.of(context).pop();
                               }
                             },
-                            child: Text("Add task"),
+                            child: Text("Add card"),
                           ),
                         ))
                   ],
@@ -817,24 +817,24 @@ class _BoardState extends State<Board> {
         });
   }
 
-  _addTask(int index, String name) {
-    addTask(window.localStorage['token'], _lists[index].id, name, "")
+  _addCard(int index, String name) {
+    addCard(window.localStorage['token'], _lists[index].id, name, "")
         .then((response) => {
               if (response.statusCode == 201)
                 {
                   setState(() {
-                    Task task = new Task(
+                    Card card = new Card(
                         id: jsonDecode(response.body)['id'],
                         name: jsonDecode(response.body)['name'],
                         description: jsonDecode(response.body)['description']);
-                    _lists[index].tasks.add(task);
-                    _taskTextController.text = "";
+                    _lists[index].cards.add(card);
+                    _cardTextController.text = "";
                   })
                 }
             });
   }
 
-  Container _buildTask(int index, int innerIndex) {
+  Container _buildCard(int index, int innerIndex) {
     return Container(
       width: 300.0,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -844,7 +844,7 @@ class _BoardState extends State<Board> {
           child: Container(
             width: 300.0,
             padding: const EdgeInsets.all(16.0),
-            child: Text(_lists[index].tasks[innerIndex].name),
+            child: Text(_lists[index].cards[innerIndex].name),
             decoration: BoxDecoration(
               boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
               borderRadius: BorderRadius.circular(10.0),
@@ -858,13 +858,13 @@ class _BoardState extends State<Board> {
             children: [
               Row(
                 children: [
-                  Text(_lists[index].tasks[innerIndex].name),
+                  Text(_lists[index].cards[innerIndex].name),
                   Spacer(),
                   Container(
                     width: 25,
                     child: TextButton(
                       onPressed: () {
-                        _showEditTaskDialog(index, innerIndex);
+                        _showEditCardDialog(index, innerIndex);
                       },
                       child: Icon(
                         Icons.edit,
@@ -877,7 +877,7 @@ class _BoardState extends State<Board> {
                     width: 25,
                     child: TextButton(
                       onPressed: () {
-                        _deleteTask(index, innerIndex);
+                        _deleteCard(index, innerIndex);
                       },
                       child: Icon(
                         Icons.delete,
@@ -890,15 +890,15 @@ class _BoardState extends State<Board> {
               ),
               Row(
                 children: [
-                  if (_lists[index].tasks[innerIndex].deadline == null)
+                  if (_lists[index].cards[innerIndex].deadline == null)
                     Container()
                   else
                     Container(
                         color: Colors.grey[100],
                         child: Padding(
                           padding: const EdgeInsets.all(2.0),
-                          child: Text(_lists[index].tasks[innerIndex].deadline.substring(0, 10) + " " +
-                              _lists[index].tasks[innerIndex].deadline.substring(11, 16)),
+                          child: Text(_lists[index].cards[innerIndex].deadline.substring(0, 10) + " " +
+                              _lists[index].cards[innerIndex].deadline.substring(11, 16)),
                         )),
                 ],
               )
@@ -910,18 +910,18 @@ class _BoardState extends State<Board> {
             color: Colors.white,
           ),
         ),
-        data: {"from": index, "task": _lists[index].tasks[innerIndex]},
+        data: {"from": index, "card": _lists[index].cards[innerIndex]},
       ),
     );
   }
 
-  _deleteTask(int listIndex, int taskIndex) {
-    deleteTask(window.localStorage['token'], _lists[listIndex].tasks[taskIndex].id)
+  _deleteCard(int listIndex, int cardIndex) {
+    deleteCard(window.localStorage['token'], _lists[listIndex].cards[cardIndex].id)
         .then((response) => {
               if (response.statusCode == 200)
                 {
                   setState(() {
-                    _lists[listIndex].tasks.removeAt(taskIndex);
+                    _lists[listIndex].cards.removeAt(cardIndex);
                   })
                 }
             });
@@ -936,14 +936,14 @@ class _BoardState extends State<Board> {
                   InnerList innerList = new InnerList(
                       id: listFromDatabase['id'],
                       name: listFromDatabase['name'],
-                      tasks: List<Task>());
+                      cards: List<Card>());
 
-                  for (var taskFromDatabase in listFromDatabase['cards']) {
-                    innerList.tasks.add(new Task(
-                        id: taskFromDatabase['id'],
-                        name: taskFromDatabase['name'],
-                        description: taskFromDatabase['description'].toString(),
-                        deadline: taskFromDatabase['deadline']));
+                  for (var cardFromDatabase in listFromDatabase['cards']) {
+                    innerList.cards.add(new Card(
+                        id: cardFromDatabase['id'],
+                        name: cardFromDatabase['name'],
+                        description: cardFromDatabase['description'].toString(),
+                        deadline: cardFromDatabase['deadline']));
                   }
                   _lists.add(innerList);
                 }
@@ -952,12 +952,12 @@ class _BoardState extends State<Board> {
         });
   }
 
-  void _showEditTaskDialog(int index, int innerIndex) {
+  void _showEditCardDialog(int index, int innerIndex) {
     _changeTextController =
-        new TextEditingController(text: _lists[index].tasks[innerIndex].name);
+        new TextEditingController(text: _lists[index].cards[innerIndex].name);
     TextEditingController _changeDescriptionTextController =
-        new TextEditingController(text: _lists[index].tasks[innerIndex].description);
-    String deadline = _lists[index].tasks[innerIndex].deadline;
+        new TextEditingController(text: _lists[index].cards[innerIndex].description);
+    String deadline = _lists[index].cards[innerIndex].deadline;
     DateTime _dateTime;
     String data = "Choose date";
     String time = "Choose time";
@@ -972,13 +972,13 @@ class _BoardState extends State<Board> {
         builder: (BuildContext context) {
           return StatefulBuilder(builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit task:'),
+              title: Text('Edit card:'),
               content: Container(
                 height: 350,
                 child: Column(
                   children: [
                     Text(
-                      "Task name",
+                      "Card name",
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     TextField(
@@ -988,7 +988,7 @@ class _BoardState extends State<Board> {
                       height: 10,
                     ),
                     Text(
-                      "Task description",
+                      "Card description",
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     TextFormField(
@@ -1103,7 +1103,7 @@ class _BoardState extends State<Board> {
                   onPressed: () {
                     if (_changeTextController.text.isEmpty)
                       setState(() {
-                        error = "Task must have name";
+                        error = "Card must have name";
                       });
                     else
                       setState(() {
@@ -1115,16 +1115,16 @@ class _BoardState extends State<Board> {
                         error = "Choose time";
                       });
                     else if (error == null)
-                      updateTask(window.localStorage['token'], _lists[index].tasks[innerIndex].id,
+                      updateCard(window.localStorage['token'], _lists[index].cards[innerIndex].id,
                               _changeTextController.text,_changeDescriptionTextController.text, _dateTime.toString(), _lists[index].id)
                           .then((response) => {
                                 if (response.statusCode == 202)
                                   setState(() {
-                                    _lists[index].tasks[innerIndex].name = _changeTextController.text;
-                                    _lists[index].tasks[innerIndex].description = _changeDescriptionTextController.text;
-                                    _lists[index].tasks[innerIndex].deadline = _dateTime.toString();
+                                    _lists[index].cards[innerIndex].name = _changeTextController.text;
+                                    _lists[index].cards[innerIndex].description = _changeDescriptionTextController.text;
+                                    _lists[index].cards[innerIndex].deadline = _dateTime.toString();
                                     if (_dateTime == null)
-                                      _lists[index].tasks[innerIndex].deadline = null;
+                                      _lists[index].cards[innerIndex].deadline = null;
                                     Navigator.of(context).pop();
                                     refreshView();
                                     _changeTextController.clear();
