@@ -96,23 +96,23 @@ Future<http.Response> getLists(String token, int boardId) async {
   return response;
 }
 
-Future<http.Response> addTask(String token, int columnId, String name, String description) async {
+Future<http.Response> addCard(String token, int columnId, String name, String description) async {
   http.Response response = await http.post('$url' + "/api/v1/" + '$columnId' + "/card",
       headers: {"Authorization": "Bearer " + token},
       body: {'name': name, "description": description});
   return response;
 }
 
-Future<http.Response> deleteTask(String token, int taskId) async {
-  http.Response response = await http.delete('$url' + "/api/v1/card/" + '$taskId',
+Future<http.Response> deleteCard(String token, int cardId) async {
+  http.Response response = await http.delete('$url' + "/api/v1/card/" + '$cardId',
       headers: {"Authorization": "Bearer " + token});
   return response;
 }
 
-Future<http.Response> updateTask(
-    String token, int taskId, String name, String description, String deadline, int columnId) async {
+Future<http.Response> updateCard(
+    String token, int cardId, String name, String description, String deadline, int columnId) async {
   http.Response response = await http.patch(
-      '$url' + "/api/v1/card/" + '$taskId',
+      '$url' + "/api/v1/card/" + '$cardId',
       headers: {"Authorization": "Bearer " + token},
       body: {'name': name,'description': description, 'deadline': deadline, 'column_id':columnId.toString()});
   return response;
