@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:delta2_trello_frontend/http_service.dart';
+import 'package:delta2_trello_frontend/task_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -974,7 +975,7 @@ class _BoardState extends State<Board> {
             return AlertDialog(
               title: Text('Edit card:'),
               content: Container(
-                height: 350,
+                height: 600,
                 child: Column(
                   children: [
                     Text(
@@ -1087,6 +1088,9 @@ class _BoardState extends State<Board> {
                             error,
                             style: TextStyle(color: Colors.red, fontSize: 16),
                           ),
+                    SizedBox(height: 10),
+                    Text("Tasks"),
+                    TaskListWidget(_lists[index].cards[innerIndex].id)
                   ],
                 ),
               ),

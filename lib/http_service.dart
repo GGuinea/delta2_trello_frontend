@@ -117,3 +117,19 @@ Future<http.Response> updateCard(
       body: {'name': name,'description': description, 'deadline': deadline, 'column_id':columnId.toString()});
   return response;
 }
+
+Future<http.Response> addTask(
+    String token, int cardId, String name, bool done) async {
+  http.Response response = await http.post(
+      '$url' + "/api/v1/add/task/" + '$cardId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {'name': name, 'done': done.toString()});
+  return response;
+}
+
+Future<http.Response> getTasks(String token, int cardId) async {
+  http.Response response = await http.get(
+      '$url' + "/api/v1/" + '$cardId' + "/tasks",
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
