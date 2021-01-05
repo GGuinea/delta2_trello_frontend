@@ -142,3 +142,10 @@ Future<http.Response> updateTask(String token, int taskId, String name, bool don
       body: {'name': name, 'done': done.toString()});
   return response;
 }
+
+Future<http.Response> deleteTask(String token, int taskId) async {
+  http.Response response = await http.delete(
+      '$url' + "/api/v1/remove/task/" + '$taskId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}

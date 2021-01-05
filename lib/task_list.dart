@@ -92,25 +92,47 @@ class _TaskListWidgetState extends State<TaskListWidget> {
               ],
             );
           } else {
-            return CheckboxListTile(
-              title: Text(tasks[index].name),
-              value: tasks[index].done,
-              onChanged: (bool value) {
-                updateTask(window.localStorage['token'], tasks[index].id,
-                        tasks[index].name, value)
-                    .then((response) => {
-                          if (response.statusCode == 201)
-                            {
-                              setState(() {
-                                tasks[index].done = value;
-                              })
-                            }
-                        });
+            return Row(
+              children: [
+                Expanded(
+                  child: CheckboxListTile(
+                    title: Text(tasks[index].name),
+                    value: tasks[index].done,
+                    onChanged: (bool value) {
+                      updateTask(window.localStorage['token'], tasks[index].id,
+                              tasks[index].name, value)
+                          .then((response) => {
+                                if (response.statusCode == 201)
+                                  {
+                                    setState(() {
+                                      tasks[index].done = value;
+                                    })
+                                  }
+                              });
 
-                setState(() {
-                  tasks[index].done = value;
-                });
-              },
+                      setState(() {
+                        tasks[index].done = value;
+                      });
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                  ),
+                  onPressed: () {
+                    deleteTask(window.localStorage['token'], tasks[index].id).then((response) => {
+                      if (response.statusCode == 200) {
+                        setState((){
+                          tasks.removeAt(index);
+                        })
+                      }
+                    });
+                  },
+                  iconSize: 32,
+                  tooltip: "Delete",
+                )
+              ],
             );
           }
         },
