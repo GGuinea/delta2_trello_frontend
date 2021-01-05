@@ -31,9 +31,8 @@ class _TaskListWidgetState extends State<TaskListWidget> {
             {
               setState(() {
                 for (var taskFromDatabase in jsonDecode(response.body)) {
-                  print(taskFromDatabase);
-                  Task task =
-                      Task(taskFromDatabase["id"],taskFromDatabase["name"], taskFromDatabase["done"]);
+                  Task task = Task(taskFromDatabase["id"],
+                      taskFromDatabase["name"], taskFromDatabase["done"]);
                   tasks.add(task);
                 }
               })
@@ -97,6 +96,17 @@ class _TaskListWidgetState extends State<TaskListWidget> {
               title: Text(tasks[index].name),
               value: tasks[index].done,
               onChanged: (bool value) {
+                updateTask(window.localStorage['token'], tasks[index].id,
+                        tasks[index].name, value)
+                    .then((response) => {
+                          if (response.statusCode == 201)
+                            {
+                              setState(() {
+                                tasks[index].done = value;
+                              })
+                            }
+                        });
+
                 setState(() {
                   tasks[index].done = value;
                 });

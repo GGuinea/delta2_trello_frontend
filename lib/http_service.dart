@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:delta2_trello_frontend/task_list.dart';
 import 'package:http/http.dart' as http;
 
 final String url = "https://trellodelta.herokuapp.com";
@@ -131,5 +132,13 @@ Future<http.Response> getTasks(String token, int cardId) async {
   http.Response response = await http.get(
       '$url' + "/api/v1/" + '$cardId' + "/tasks",
       headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+
+Future<http.Response> updateTask(String token, int taskId, String name, bool done) async {
+  http.Response response = await http.patch(
+      '$url' + "/api/v1/task/" + '$taskId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {'name': name, 'done': done.toString()});
   return response;
 }
