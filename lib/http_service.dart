@@ -158,3 +158,23 @@ Future<http.Response> updateWallpaper(String token, int boardId,
       body: {'background_id': wallpaper});
   return response;
 }
+Future<http.Response> addLabelToCard(
+    String token, int cardId, int labelId) async {
+  http.Response response = await http.post(
+      '$url' + "/api/v1/" + '$cardId' +"/"+ '$labelId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+Future<http.Response> updateLabel(String token, int labelId, String name) async {
+  http.Response response = await http.patch(
+      '$url' + "/api/v1/label/" + '$labelId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {'name': name});
+  return response;
+}
+
+Future<http.Response> deleteLabelFromCard(String token, int cardId,int labelId) async {
+  http.Response response = await http.delete('$url' + "/api/v1/" + '$cardId'+"/"+ '$labelId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
