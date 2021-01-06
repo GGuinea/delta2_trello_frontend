@@ -142,3 +142,25 @@ Future<http.Response> updateTask(String token, int taskId, String name, bool don
       body: {'name': name, 'done': done.toString()});
   return response;
 }
+Future<http.Response> addLabelToCard(
+    String token, int cardId, int labelId) async {
+  http.Response response = await http.post(
+      '$url' + "/api/v1/" + '$cardId' +"/"+ '$labelId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+Future<http.Response> updateLabel(String token, int labelId, String name) async {
+  http.Response response = await http.patch(
+      '$url' + "/api/v1/label/" + '$labelId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {'name': name});
+  return response;
+}
+
+Future<http.Response> deleteLabelFromCard(String token, int cardId,int labelId) async {
+  http.Response response = await http.delete('$url' + "/api/v1/" + '$cardId'+"/"+ '$labelId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}
+
+

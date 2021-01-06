@@ -24,8 +24,9 @@ class Card {
   String name;
   String deadline;
   String description;
+  List<Label> labels;
 
-  Card({this.id,this.name ,this.deadline,this.description});
+  Card({this.id,this.name ,this.deadline,this.description,this.labels});
 }
 
 class InnerList {
@@ -34,6 +35,22 @@ class InnerList {
   List<Card> cards;
 
   InnerList({this.id, this.name, this.cards});
+}
+
+class Label {
+  int id;
+  String name;
+  String color;
+
+  Label({this.id, this.name, this.color});
+
+  factory Label.fromJson(Map<String,dynamic> json){
+    return Label(
+        id:json['id'] as int,
+        name: json['name'] as String,
+        color: json['color'] as String,
+    );
+  }
 }
 
 class _BoardState extends State<Board> {
@@ -48,10 +65,18 @@ class _BoardState extends State<Board> {
   final int boardId;
   String _boardName = "";
   String _description = "";
+  String _redLabel = "";
+  String _blueLabel = "";
+  String _greenLabel = "";
+  String _yellowLabel = "";
+  String _orangeLabel = "";
+  String _purpleLabel = "";
+
 
   bool _firstFetch = true;
   List _members = [];
   List<InnerList> _lists = [];
+  List<Label> _labelLists = [];
 
   Timer searchOnStoppedTyping;
   bool viewVisible = false;
@@ -259,6 +284,13 @@ class _BoardState extends State<Board> {
               setState(() {
                 _description = jsonDecode(response.body)['description'];
                 _boardName = jsonDecode(response.body)['name'];
+                _labelLists = (jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList();
+                _redLabel = _labelLists[0].name;
+                _greenLabel = _labelLists[1].name;
+                _blueLabel = _labelLists[2].name;
+                _yellowLabel = _labelLists[3].name;
+                _orangeLabel = _labelLists[4].name;
+                _purpleLabel = _labelLists[5].name;
               }),
             }
           else
@@ -347,101 +379,210 @@ class _BoardState extends State<Board> {
           decoration: BoxDecoration(border: Border.all(color: Colors.black12), color: Colors.white),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          viewVisible = false;
-                          _menu = 0;
-                        });
-                      },
-                      child: Icon(Icons.arrow_back),
-                    ),
-                    SizedBox(
-                      width: 90,
-                    ),
-                    Text("Menu", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                  ],
-                ),
-                Container(
-                  decoration: BoxDecoration(border: Border.all(color: Colors.teal)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.dashboard,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              "About this board",
-                              style: TextStyle(
-                                fontSize: 20,
-                              ),
-                            )
-                          ],
-                        ),
-                        TextFormField(
-                          controller: _descriptionController,
-                          maxLines: 6,
-                          decoration: InputDecoration(
-                              border: new OutlineInputBorder(
-                                  borderSide: new BorderSide(color: Colors.teal)),
-                              hintText: 'Enter details about board'),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: FlatButton(
-                            child: new Text("Save"),
-                            color: Colors.lightGreenAccent,
-                            onPressed: () {
-                              changeBoardDescription(window.localStorage['token'],
-                                      _descriptionController.text, boardId)
-                                  .then((response) => {
-                                        if (response.statusCode == 202)
-                                          {print("Description changed")}
-                                      });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            viewVisible = false;
+                            _menu = 0;
+                          });
+                        },
+                        child: Icon(Icons.arrow_back),
+                      ),
+                      SizedBox(
+                        width: 90,
+                      ),
+                      Text("Menu", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                    ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: RaisedButton(
-                    onPressed: () {
-                      _showDialog();
-                    },
-                    textColor: Colors.black54,
-                    padding: const EdgeInsets.all(0.0),
-                    child: Container(
-                      decoration: const BoxDecoration(color: Colors.white54),
-                      padding: const EdgeInsets.all(5.0),
-                      child: Row(
+                  Container(
+                    decoration: BoxDecoration(border: Border.all(color: Colors.teal)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
                         children: [
-                          Icon(
-                            Icons.delete,
-                            color: Colors.red,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.dashboard,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "About this board",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              )
+                            ],
                           ),
-                          SizedBox(
-                            width: 5,
+                          TextFormField(
+                            controller: _descriptionController,
+                            maxLines: 5,
+                            decoration: InputDecoration(
+                                border: new OutlineInputBorder(
+                                    borderSide: new BorderSide(color: Colors.teal)),
+                                hintText: 'Enter details about board'),
                           ),
-                          Text("Delete board")
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: FlatButton(
+                              child: new Text("Save"),
+                              color: Colors.lightGreenAccent,
+                              onPressed: () {
+                                changeBoardDescription(window.localStorage['token'],
+                                        _descriptionController.text, boardId)
+                                    .then((response) => {
+                                          if (response.statusCode == 202)
+                                            {print("Description changed")}
+                                        });
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(border: Border.all(color: Colors.teal)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.label,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "Labels",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              )
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.red,
+                                child: Text(_redLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[0]);
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.blue,
+                                child: Text(_blueLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[2]);
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.green,
+                                child: Text(_greenLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[1]);
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.yellow,
+                                child: Text(_yellowLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[3]);
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.orange,
+                                child: Text(_orangeLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[4]);
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            child: SizedBox(
+                              width: 300,
+                              child: RaisedButton(
+                                color: Colors.purple,
+                                child: Text(_purpleLabel, style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  _showChangeLabelNameTextDialog(_labelLists[5]);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: RaisedButton(
+                      onPressed: () {
+                        _showDialog();
+                      },
+                      textColor: Colors.black54,
+                      padding: const EdgeInsets.all(0.0),
+                      child: Container(
+                        decoration: const BoxDecoration(color: Colors.white54),
+                        padding: const EdgeInsets.all(5.0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Delete board")
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -718,6 +859,62 @@ class _BoardState extends State<Board> {
         });
   }
 
+  _showChangeLabelNameTextDialog(Label label) {
+    _changeTextController = new TextEditingController(text: label.name);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Change label name : '),
+            content: TextField(
+              controller: _changeTextController,
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: new Text("Submit"),
+                onPressed: () {
+                  if(_changeTextController.text.isEmpty)
+                    _changeTextController.text = "";
+                  updateLabel(window.localStorage['token'], label.id, _changeTextController.text )
+                        .then((response) => {
+                      if (response.statusCode == 202)
+                      setState(() {
+                        switch (label.color) {
+                          case "red":
+                            _redLabel = _changeTextController.text;
+                            break;
+                          case "blue":
+                            _blueLabel = _changeTextController.text;
+                            break;
+                          case "green":
+                            _greenLabel = _changeTextController.text;
+                            break;
+                          case "orange":
+                            _orangeLabel = _changeTextController.text;
+                            break;
+                          case "yellow":
+                            _yellowLabel = _changeTextController.text;
+                            break;
+                          case "purple":
+                            _purpleLabel = _changeTextController.text;
+                            break;
+                        }
+                        Navigator.of(context).pop();
+                      })
+                    });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
   _showCreateLinkDialog(String link) {
     _changeTextController = new TextEditingController(text: link);
     showDialog(
@@ -827,13 +1024,15 @@ class _BoardState extends State<Board> {
                     Card card = new Card(
                         id: jsonDecode(response.body)['id'],
                         name: jsonDecode(response.body)['name'],
-                        description: jsonDecode(response.body)['description']);
+                        description: jsonDecode(response.body)['description'],
+                       );
                     _lists[index].cards.add(card);
                     _cardTextController.text = "";
                   })
                 }
             });
   }
+
 
   Container _buildCard(int index, int innerIndex) {
     return Container(
@@ -857,6 +1056,29 @@ class _BoardState extends State<Board> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
+              Container(
+                height: 25,
+                child: ListView.builder(
+                  itemCount: _lists[index].cards[innerIndex].labels.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context,i){
+                    return Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: findColor(_lists[index].cards[innerIndex].labels[i].color),
+                        ),
+                        width: 50,
+                        child: Tooltip(
+                          message: _lists[index].cards[innerIndex].labels[i].name,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
               Row(
                 children: [
                   Text(_lists[index].cards[innerIndex].name),
@@ -915,7 +1137,27 @@ class _BoardState extends State<Board> {
       ),
     );
   }
+  Color findColor(String color){
+    switch(color){
+      case "red":
+        return Colors.red;
 
+      case "green":
+        return Colors.green;
+
+      case "blue":
+        return Colors.blue;
+
+      case "yellow":
+        return Colors.yellow;
+
+      case "orange":
+        return Colors.orange;
+
+      case "purple":
+        return Colors.purple;
+    }
+  }
   _deleteCard(int listIndex, int cardIndex) {
     deleteCard(window.localStorage['token'], _lists[listIndex].cards[cardIndex].id)
         .then((response) => {
@@ -944,7 +1186,9 @@ class _BoardState extends State<Board> {
                         id: cardFromDatabase['id'],
                         name: cardFromDatabase['name'],
                         description: cardFromDatabase['description'].toString(),
-                        deadline: cardFromDatabase['deadline']));
+                        deadline: cardFromDatabase['deadline'],
+                        labels: (cardFromDatabase['labels'] as List).map((e) => Label.fromJson(e)).toList()
+                    ));
                   }
                   _lists.add(innerList);
                 }
@@ -952,7 +1196,6 @@ class _BoardState extends State<Board> {
             }
         });
   }
-
   void _showEditCardDialog(int index, int innerIndex) {
     _changeTextController =
         new TextEditingController(text: _lists[index].cards[innerIndex].name);
@@ -962,6 +1205,7 @@ class _BoardState extends State<Board> {
     DateTime _dateTime;
     String data = "Choose date";
     String time = "Choose time";
+    List<Label> labels= _lists[index].cards[innerIndex].labels;
     if (deadline != null) {
       _dateTime = DateTime.parse(deadline);
       data = _dateTime.toString().substring(0, 10);
@@ -976,122 +1220,341 @@ class _BoardState extends State<Board> {
               title: Text('Edit card:'),
               content: Container(
                 height: 600,
-                child: Column(
-                  children: [
-                    Text(
-                      "Card name",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    TextField(
-                      controller: _changeTextController,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "Card description",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    TextFormField(
-                      controller: _changeDescriptionTextController,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                          border: new OutlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.teal)),
-                          hintText: 'Enter details about card'),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "Due Date",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              "Date",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            GestureDetector(
-                              child: Text(data),
-                              onTap: () {
-                                showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2100),
-                                ).then((value) {
-                                  setState(() {
-                                    if (value != null) {
-                                      data = value.toString().substring(0, 10);
-                                      _dateTime = new DateTime(value.year, value.month, value.day);
-                                      error = null;
-                                    } else {
-                                      data = "Choose date";
-                                      time = "Choose time";
-                                      _dateTime = null;
-                                    }
-                                  });
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "Time",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            GestureDetector(
-                              child: Text(time),
-                              onTap: () {
-                                showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                ).then((value) {
-                                  setState(() {
-                                    if (_dateTime == null) {
-                                      error = "First choose Date";
-                                    } else {
-                                      if (value != null) {
-                                        _dateTime = new DateTime(_dateTime.year, _dateTime.month,
-                                            _dateTime.day, value.hour, value.minute);
-                                        if (_dateTime.isBefore(DateTime.now())) {
-                                          error = "Wrong time";
-                                        } else {
-                                          time = value.toString().substring(10, 15);
-                                          error = null;
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Text(
+                        "Card name",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      TextField(
+                        controller: _changeTextController,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),Text(
+                        "Card label",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                     Column(
+                       children: [
+                         Row(
+                           children: [
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.red,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_redLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"red")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                     if(isChoosenLabel(labels,"red"))
+                                       deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[0].id).then((response) => {
+                                         if (response.statusCode == 200){
+                                           labels.removeWhere((element) => element.color == "red"),
+                                           setState(() {})
+                                         }
+                                       });
+                                     else
+                                       addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[0].id).then((response) => {
+                                         if (response.statusCode == 201){
+                                           labels.clear(),
+                                           labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                           setState(() {})
+                                         }
+                                       });
+                                   },
+                                 ),
+                               ),
+
+                             ),
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.blue,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_blueLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"blue")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                     if(isChoosenLabel(labels,"blue"))
+                                       deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[2].id).then((response) => {
+                                         if (response.statusCode == 200){
+                                           labels.removeWhere((element) => element.color == "blue"),
+                                           setState(() {})
+                                         }
+                                       });
+                                     else
+                                       addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[2].id).then((response) => {
+                                         if (response.statusCode == 201){
+                                           labels.clear(),
+                                           labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                           setState(() {})
+                                         }
+                                       });
+                                   },
+                                 ),
+                               ),
+                             ),
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.green,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_greenLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"green")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                     if(isChoosenLabel(labels,"green"))
+                                       deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[1].id).then((response) => {
+                                         if (response.statusCode == 200){
+                                           labels.removeWhere((element) => element.color == "green"),
+                                           setState(() {})
+                                         }
+                                       });
+                                     else
+                                       addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[1].id).then((response) => {
+                                         if (response.statusCode == 201){
+                                           labels.clear(),
+                                           labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                           setState(() {})
+                                         }
+                                       });
+                                   },
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                         Row(
+                           children: [
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.yellow,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_yellowLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"yellow")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                     if(isChoosenLabel(labels,"yellow"))
+                                       deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[3].id).then((response) => {
+                                         if (response.statusCode == 200){
+                                           labels.removeWhere((element) => element.color == "yellow"),
+                                           setState(() {})
+                                         }
+                                       });
+                                     else
+                                       addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[3].id).then((response) => {
+                                         if (response.statusCode == 201){
+                                           labels.clear(),
+                                           labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                           setState(() {})
+                                         }
+                                       });
+                                   },
+                                 ),
+                               ),
+                             ),
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.orange,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_orangeLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"orange")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                     if(isChoosenLabel(labels,"orange"))
+                                       deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[4].id).then((response) => {
+                                         if (response.statusCode == 200){
+                                           labels.removeWhere((element) => element.color == "orange"),
+                                           setState(() {})
+                                         }
+                                       });
+                                     else
+                                       addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[4].id).then((response) => {
+                                         if (response.statusCode == 201){
+                                           labels.clear(),
+                                           labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                           setState(() {})
+                                         }
+                                       });
+                                   },
+                                 ),
+                               ),
+                             ),
+                             Padding(
+                               padding: const EdgeInsets.all(3),
+                               child: SizedBox(
+                                 width: 200,
+                                 child: RaisedButton(
+                                   color: Colors.purple,
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                     children: [
+                                       Text(_purpleLabel, style: TextStyle(color: Colors.white)),
+                                       isChoosenLabel(labels,"purple")?Icon(Icons.check,color:Colors.white):Container(),
+                                     ],
+                                   ),
+                                   onPressed: () {
+                                      if(isChoosenLabel(labels,"purple"))
+                                        deleteLabelFromCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[5].id).then((response) => {
+                                        if (response.statusCode == 200){
+                                          labels.removeWhere((element) => element.color == "purple"),
+                                          setState(() {})
                                         }
+                                      });
+                                      else
+                                        addLabelToCard(window.localStorage['token'],_lists[index].cards[innerIndex].id,_labelLists[5].id).then((response) => {
+                                          if (response.statusCode == 201){
+                                            labels.clear(),
+                                            labels.addAll((jsonDecode(response.body)['labels'] as List).map((e) => Label.fromJson(e)).toList()),
+                                            setState(() {})
+                                          }
+                                        });
+                                   },
+                                 ),
+                               ),
+                             ),
+                           ],
+                         )
+                       ],
+                     ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Card description",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      TextFormField(
+                        controller: _changeDescriptionTextController,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                                borderSide: new BorderSide(color: Colors.teal)),
+                            hintText: 'Enter details about card'),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Due Date",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                "Date",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              GestureDetector(
+                                child: Text(data),
+                                onTap: () {
+                                  showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2100),
+                                  ).then((value) {
+                                    setState(() {
+                                      if (value != null) {
+                                        data = value.toString().substring(0, 10);
+                                        _dateTime = new DateTime(value.year, value.month, value.day);
+                                        error = null;
                                       } else {
+                                        data = "Choose date";
                                         time = "Choose time";
+                                        _dateTime = null;
                                       }
-                                    }
+                                    });
                                   });
-                                });
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    error == null
-                        ? Container()
-                        : Text(
-                            error,
-                            style: TextStyle(color: Colors.red, fontSize: 16),
+                                },
+                              ),
+                            ],
                           ),
-                    SizedBox(height: 10),
-                    Text("Tasks"),
-                    TaskListWidget(_lists[index].cards[innerIndex].id)
-                  ],
+                          Column(
+                            children: [
+                              Text(
+                                "Time",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              GestureDetector(
+                                child: Text(time),
+                                onTap: () {
+                                  showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  ).then((value) {
+                                    setState(() {
+                                      if (_dateTime == null) {
+                                        error = "First choose Date";
+                                      } else {
+                                        if (value != null) {
+                                          _dateTime = new DateTime(_dateTime.year, _dateTime.month,
+                                              _dateTime.day, value.hour, value.minute);
+                                          if (_dateTime.isBefore(DateTime.now())) {
+                                            error = "Wrong time";
+                                          } else {
+                                            time = value.toString().substring(10, 15);
+                                            error = null;
+                                          }
+                                        } else {
+                                          time = "Choose time";
+                                        }
+                                      }
+                                    });
+                                  });
+                                },
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      error == null
+                          ? Container()
+                          : Text(
+                              error,
+                              style: TextStyle(color: Colors.red, fontSize: 16),
+                            ),
+                      SizedBox(height: 10),
+                      Text("Tasks"),
+                      TaskListWidget(_lists[index].cards[innerIndex].id)
+                    ],
+                  ),
                 ),
               ),
               actions: <Widget>[
@@ -1143,5 +1606,13 @@ class _BoardState extends State<Board> {
   }
   void refreshView(){
     setState(() {});
+  }
+
+  bool isChoosenLabel(List<Label> labels, String color) {
+    for(int i=0 ; i < labels.length;i++){
+      if (labels[i].color == color)
+        return true;
+    }
+    return false;
   }
 }
