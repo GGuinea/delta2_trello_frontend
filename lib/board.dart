@@ -49,7 +49,7 @@ class _BoardState extends State<Board> {
   String _boardName = "";
   String _description = "";
 
-  String image = "";
+  String _image = "";
 
   bool _firstFetch = true;
   List _members = [];
@@ -103,7 +103,7 @@ class _BoardState extends State<Board> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(image),
+              image: AssetImage(_image),
               fit: BoxFit.cover,
             ),
           ),
@@ -269,6 +269,7 @@ class _BoardState extends State<Board> {
               setState(() {
                 _description = jsonDecode(response.body)['description'];
                 _boardName = jsonDecode(response.body)['name'];
+                _image += 'images/' + jsonDecode(response.body)['background_id'].toString() + '.jpg';
               }),
             }
           else
@@ -460,20 +461,16 @@ class _BoardState extends State<Board> {
                       child: Image.asset('images/0.jpg')),
                   iconSize: 200,
                   onPressed: () {
-
-                    setState(() {
-                      image = "images/0.jpg";
-                    });
-
-                    /*updateWallpaper(window.localStorage['token'], boardId, "0")
+                    updateWallpaper(
+                            window.localStorage['token'], boardId, "0")
                         .then((response) => {
-                              if (response.statusCode == 201)
+                              if (response.statusCode == 202)
                                 {
                                   setState(() {
-                                    image = "images/0.jpg";
+                                    _image = "images/0.jpg";
                                   })
                                 }
-                            });*/
+                            });
                   },
                 ),
                 IconButton(
@@ -482,8 +479,15 @@ class _BoardState extends State<Board> {
                       child: Image.asset('images/1.jpg')),
                   iconSize: 200,
                   onPressed: () {
-                    setState(() {
-                      image = "images/1.jpg";
+                    updateWallpaper(
+                        window.localStorage['token'], boardId, "1")
+                        .then((response) => {
+                      if (response.statusCode == 202)
+                        {
+                          setState(() {
+                            _image = "images/1.jpg";
+                          })
+                        }
                     });
                   },
                 ),IconButton(
@@ -492,8 +496,15 @@ class _BoardState extends State<Board> {
                       child: Image.asset('images/2.jpg')),
                   iconSize: 200,
                   onPressed: () {
-                    setState(() {
-                      image = "images/2.jpg";
+                    updateWallpaper(
+                        window.localStorage['token'], boardId, "2")
+                        .then((response) => {
+                      if (response.statusCode == 202)
+                        {
+                          setState(() {
+                            _image = "images/2.jpg";
+                          })
+                        }
                     });
                   },
                 ),

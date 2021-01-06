@@ -149,3 +149,12 @@ Future<http.Response> deleteTask(String token, int taskId) async {
       headers: {"Authorization": "Bearer " + token});
   return response;
 }
+
+Future<http.Response> updateWallpaper(String token, int boardId,
+    String wallpaper) async {
+  http.Response response = await http.patch(
+      '$url' + "/api/v1/board/" + '$boardId',
+      headers: {"Authorization": "Bearer " + token},
+      body: {'background_id': wallpaper});
+  return response;
+}
