@@ -458,16 +458,16 @@ class _BoardState extends State<Board> {
                 IconButton(
                   icon: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset('images/0.jpg')),
+                      child: Image.asset('images/3.jpg')),
                   iconSize: 200,
                   onPressed: () {
                     updateWallpaper(
-                            window.localStorage['token'], boardId, "0")
+                            window.localStorage['token'], boardId, "3")
                         .then((response) => {
                               if (response.statusCode == 202)
                                 {
                                   setState(() {
-                                    _image = "images/0.jpg";
+                                    _image = "images/3.jpg";
                                   })
                                 }
                             });
@@ -507,6 +507,28 @@ class _BoardState extends State<Board> {
                         }
                     });
                   },
+                ), SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: RaisedButton(
+                    shape:RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        side: BorderSide(color: Colors.blue)
+                    ),
+                    color: Colors.white ,
+                    onPressed: () {
+                      updateWallpaper(
+                          window.localStorage['token'], boardId, "0")
+                          .then((response) => {
+                        if (response.statusCode == 202)
+                          {
+                            setState(() {
+                              _image = "";
+                            })
+                          }
+                      });
+                    },
+                  )
                 ),
               ],
             ),
