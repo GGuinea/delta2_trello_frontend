@@ -1638,7 +1638,9 @@ class _BoardState extends State<Board> {
                                           if (_dateTime.isBefore(DateTime.now())) {
                                             error = "Wrong time";
                                           } else {
-                                            time = value.toString().substring(10, 15);
+                                            String hour =  value.hour<10?'0'+value.hour.toString():value.hour.toString();
+                                            String minute =  value.minute<10?'0'+value.minute.toString():value.minute.toString();
+                                            time = hour +':'+ minute ;
                                             error = null;
                                           }
                                         } else {
