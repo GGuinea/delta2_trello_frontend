@@ -313,7 +313,6 @@ class _BoardState extends State<Board> {
     return Stack(children: [
       Container(
         width: 300.0,
-        height: MediaQuery.of(context).size.height * 0.8,
         decoration: BoxDecoration(
           boxShadow: [BoxShadow(blurRadius: 3, color: Colors.grey)],
           borderRadius: BorderRadius.circular(10.0),
@@ -356,8 +355,7 @@ class _BoardState extends State<Board> {
                 },
               )
             ]),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.65,
+            Expanded(
               child: DragAndDropList<Card>(
                 _lists[index].cards,
                 itemBuilder: (BuildContext context, item) {
