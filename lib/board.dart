@@ -105,11 +105,26 @@ class _BoardState extends State<Board> {
         appBar: AppBar(
           toolbarOpacity: 0.7,
           centerTitle: true,
-          title: Image.asset(
-            'images/Trello_logo_white.png',
-            height: 32,
+          title: GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, "/");
+            },
+            child: Image.asset(
+              'images/Trello_logo_white.png',
+              height: 32,
+            ),
           ),
           automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, "/");
+            },
+            iconSize: 32,
+            tooltip: "Back to boards",
+          ),
           actions: [
             IconButton(
               icon: Icon(
@@ -122,7 +137,7 @@ class _BoardState extends State<Board> {
               },
               iconSize: 32,
               tooltip: "Logout",
-            )
+            ),
           ],
         ),
         body: Container(
