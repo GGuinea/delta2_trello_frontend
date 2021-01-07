@@ -178,3 +178,9 @@ Future<http.Response> deleteLabelFromCard(String token, int cardId,int labelId) 
       headers: {"Authorization": "Bearer " + token});
   return response;
 }
+
+Future<http.Response> deleteList(String token, int columnId) async {
+  http.Response response = await http.delete('$url' + "/api/v1/column/" + '$columnId',
+      headers: {"Authorization": "Bearer " + token});
+  return response;
+}

@@ -323,18 +323,39 @@ class _BoardState extends State<Board> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            InkWell(
-              child: Text(
-                _lists[index].name,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: InkWell(
+                  child: Text(
+                    _lists[index].name,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onTap: () {
+                    _showChangeNameListTextDialog(_lists[index].name, index);
+                  },
                 ),
               ),
-              onTap: () {
-                _showChangeNameListTextDialog(_lists[index].name, index);
-              },
-            ),
+              IconButton(
+                icon: Icon(Icons.clear),
+                iconSize: 24,
+                onPressed: () {
+                  print(_lists[index].name);
+                  deleteList(window.localStorage['token'], _lists[index].id)
+                      .then((response) => {
+                            if (response.statusCode == 200)
+                              {
+                                setState(() {
+                                  _lists.removeAt(index);
+                                })
+                              }
+                          });
+                },
+              )
+            ]),
             Container(
               height: MediaQuery.of(context).size.height * 0.65,
               child: DragAndDropList<Card>(
