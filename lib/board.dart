@@ -1331,9 +1331,11 @@ class _BoardState extends State<Board> {
             return AlertDialog(
               title: Text('Edit card:'),
               content: Container(
-                height: 600,
-                child: SingleChildScrollView(
-                  child: Column(
+                width: 618,
+                child: ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.vertical,
+                  children: [Column(
                     children: [
                       Text(
                         "Card name",
@@ -1666,7 +1668,7 @@ class _BoardState extends State<Board> {
                       Text("Tasks"),
                       TaskListWidget(_lists[index].cards[innerIndex].id)
                     ],
-                  ),
+                  ),]
                 ),
               ),
               actions: <Widget>[

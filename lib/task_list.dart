@@ -43,7 +43,7 @@ class _TaskListWidgetState extends State<TaskListWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 110,
+      height: 400,
       width: MediaQuery.of(context).size.width * 0.3,
       child: ListView.builder(
         scrollDirection: Axis.vertical,
